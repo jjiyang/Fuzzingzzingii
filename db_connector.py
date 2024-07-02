@@ -8,7 +8,8 @@ def create_connection(host_name, user_name, user_password, db_name):
             host=host_name,
             user=user_name,
             passwd=user_password,
-            database=db_name
+            database=db_name,
+            auth_plugin='mysql_native_password'
         )
     except Error as e:
         print(f"The error '{e}' occurred")
