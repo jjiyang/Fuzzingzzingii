@@ -20,7 +20,6 @@ def connect_server():
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # IPv4, TCP
         client_socket.connect((server_ip, server_port))
         print("연결 성공")
-        client_socket.close()
     except Exception as e:
         print("Failed to connect to server:", e)
 
@@ -74,8 +73,6 @@ def main():
     print("======================================================================\n")
     time.sleep(0.7)
 
-    connect_server()
-
     # URL 입력 받기
     print("Please enter the target URL")
     target_url = input("> ")
@@ -86,7 +83,9 @@ def main():
     # 인증서 생성 및 Nginx 설정 업데이트
     # key_file, crt_file = create_certificate(domain)
     # update_nginx_config(domain, key_file, crt_file)
-
+    
+    connect_server()
+    
     # Scrapy 크롤러 프로세스 시작
     process = CrawlerProcess(get_project_settings())
     process.crawl(MySpider, start_url=target_url)  # MySpider 클래스의 이름을 사용
