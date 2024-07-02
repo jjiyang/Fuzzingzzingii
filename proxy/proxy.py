@@ -1,7 +1,9 @@
+import os
 import sys
 import signal
 from logger import Logger
 from traffic_interceptor import TrafficIntercept
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from db_connector import create_connection
 
 def signal_handler(server):
@@ -13,7 +15,7 @@ def signal_handler(server):
 
 if __name__ == "__main__":
     from network_listener import NetworkListener
-    
+
     logger = Logger()
     logger.log("Starting the server...")
 
@@ -30,14 +32,12 @@ if __name__ == "__main__":
     if db_connection.is_connected():
         logger.log("MySQL Fuzzingzzingi Database connection successful")
 
-    interceptor = TrafficIntercept(db_connection=db_connection, logger=logger)
-    server = NetworkListener(port=port, logger=logger, db_connection=db_connection, request_handler=interceptor.handle_client)
+    server = NetworkListener(port=port, logger=logger, db_connection=db_connection)
     signal.signal(signal.SIGINT, lambda s, f: signal_handler(server)(s, f))
-    
+    interceptor = TrafficIntercept(db_connection=db_connection, logger=logger)
+
     try:
         server.start_server()
     except Exception as e:
         logger.log("Server encountered an error and stopped.")
-        logger.log(str(e)) 
-        
-        
+        logger.log(str(e))
