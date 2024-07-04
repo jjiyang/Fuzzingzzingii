@@ -1,38 +1,43 @@
+import os
 import sys
 import signal
-from network_listener import NetworkListener
-from certificate_manager import CertificateManager
-from ssl_manager import SSLManager
-from traffic_interceptor import TrafficIntercept
-from request_modifier import HTTPRequest
 from logger import Logger
-# from performance import
+from traffic_interceptor import TrafficIntercept
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from db_connector import create_connection
 
-def signal_handler(signal, frame):
-    print('Signal received, stopping server.')
-    server.stop_server()
-    sys.exit(0)
+def signal_handler(server):
+    def handler(signal, frame):
+        print('Signal received, stopping server.')
+        server.stop_server()
+        sys.exit(0)
+    return handler
 
 if __name__ == "__main__":
-    # Initialize logger
+    from network_listener import NetworkListener
+
     logger = Logger()
     logger.log("Starting the server...")
 
-    # Generate certificates
-    cert_manager = CertificateManager(cert_path="wildcard_cert.pem", key_path="wildcard_key.pem")
-    cert_manager.generate_private_key()
-    cert_manager.generate_wildcard_cert(base_domain="example.com")
-
-    # Setup SSL
-    ssl_manager = SSLManager()
-    context = ssl_manager.create_ssl_context()
-
-    # Start the network listener
     port = 8888
-    server = NetworkListener(port=port, ssl_context=context, logger=logger)
-    signal.signal(signal.SIGINT, signal_handler)
-    
+
+    # 데이터베이스 연결 설정
+    db_connection = create_connection(
+        host_name="13.209.63.65",
+        user_name="zzingzzingi",
+        user_password="!Ru7eP@ssw0rD!12",
+        db_name="Fuzzingzzingi"
+    )
+
+    if db_connection.is_connected():
+        logger.log("MySQL Fuzzingzzingi Database connection successful")
+
+    server = NetworkListener(port=port, logger=logger, db_connection=db_connection)
+    signal.signal(signal.SIGINT, lambda s, f: signal_handler(server)(s, f))
+    interceptor = TrafficIntercept(db_connection=db_connection, logger=logger)
+
     try:
         server.start_server()
     except Exception as e:
         logger.log("Server encountered an error and stopped.")
+        logger.log(str(e))
