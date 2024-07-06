@@ -105,11 +105,31 @@ class SqlInjection:
         return result
 
     def get_payloads(self):
-        payloads_simple = self.file_simple.readlines()
-        payloads_union = self.file_union.readlines()
-        payloads_error = self.file_error.readlines()
-        payloads_blind = self.file_blind.readlines()
-        payloads_time = self.file_time.readlines()
+        payloads_simple = []
+        payloads_union = []
+        payloads_error = []
+        payloads_blind = []
+        payloads_time = []
+
+        simple = self.file_simple.readlines()
+        for s in simple:
+            payloads_simple.append(s.strip())
+
+        union = self.file_union.readlines()
+        for u in union:
+            payloads_union.append(u.strip())
+
+        error = self.file_error.readlines()
+        for e in error:
+            payloads_error.append(e.strip())
+
+        blind = self.file_blind.readlines()
+        for b in blind:
+            payloads_blind.append(b.strip())
+
+        timee = self.file_time.readlines()
+        for t in timee:
+            payloads_time.append(t.strip())
 
         return payloads_simple, payloads_union, payloads_error, payloads_blind, payloads_time
 
@@ -122,15 +142,18 @@ class SqlInjection:
             for simple in self.payload['simple']:
                 for key in param:
                     param[key] = simple
+                    print(f'CHECKING...\turl : {url}\t\tmethod : {method}\t\tpayload : {param}')
 
                     if method == 'GET':
                         resp = requests.get(url, params=param, allow_redirects=True)
                         if resp.is_redirect:
+                            print(f"Checked Basic payload = {simple}")
                             return url, method, param
 
                     elif method == 'POST':
                         resp = requests.post(url, data=param, allow_redirects=True)
                         if resp.is_redirect:
+                            print(f"Checked Basic payload = {simple}")
                             return url, method, param
 
         return False
@@ -143,16 +166,18 @@ class SqlInjection:
             for union_base in self.payload['union']:
                 for key in param:
                     param[key] = union_base
+                    print(f'CHECKING...\turl : {url}\t\tmethod : {method}\t\tpayload : {param}')
 
                     if method == 'GET':
                         resp = requests.get(url, params=param, allow_redirects=True)
                         if resp.is_redirect:
+                            print(f"Checked Basic payload = {union_base}")
                             return url, method, param
-
 
                     elif method == 'POST':
                         resp = requests.post(url, data=param, allow_redirects=True)
                         if resp.is_redirect:
+                            print(f"Checked Basic payload = {union_base}")
                             return url, method, param
 
         return False
@@ -166,15 +191,18 @@ class SqlInjection:
             for error_base in self.payload['error']:
                 for key in param:
                     param[key] = error_base
+                    print(f'CHECKING...\turl : {url}\t\tmethod : {method}\t\tpayload : {param}')
 
                     if method == 'GET':
                         resp = requests.get(url, params=param, allow_redirects=True)
                         if resp.status_code == 500 and 'Fuzzingzzing' in resp.text:
+                            print(f"Checked Basic payload = {error_base}")
                             return url, method, param
 
                     elif method == 'POST':
                         resp = requests.post(url, data=param, allow_redirects=True)
                         if resp.status_code == 500 and 'Fuzzingzzing' in resp.text:
+                            print(f"Checked Basic payload = {error_base}")
                             return url, method, param
 
         return False
@@ -187,6 +215,7 @@ class SqlInjection:
             for time_base in self.payload['time']:
                 for key in param:
                     param[key] = time_base
+                    print(f'CHECKING...\turl : {url}\t\tmethod : {method}\t\tpayload : {param}')
 
                 # Sleep(5)가 되면 True
                     if method == 'GET':
@@ -194,6 +223,7 @@ class SqlInjection:
                         resp = requests.get(url, params=param, allow_redirects=True)
                         end_time = time.time() - start_time
                         if int(end_time) >= 5:
+                            print(f"Checked Basic payload = {time_base}")
                             return url, method, param
 
                     elif method == 'POST':
@@ -201,168 +231,174 @@ class SqlInjection:
                         resp = requests.post(url, data=param, allow_redirects=True)
                         end_time = time.time() - start_time
                         if int(end_time) >= 5:
+                            print(f"Checked Basic payload = {time_base}")
                             return url, method, param
 
         return False
+
     def execute_simple(self, url, method, param, payloads):
         init()
-        simple_result = self.checksqli_simple(url, method, param)
-        if simple_result:
-            url_simple, method_simple, param_simple = simple_result
+        for payload_simple in payloads:
+            payload_simple = payload_simple.strip()
+            for key in param:
+                param[key] = payload_simple
 
-            for payload_simple in payloads:
-                payload_simple = payload_simple.strip()
-                for key in param_simple:
-                    param_simple[key] = payload_simple
+                if method == 'GET':
+                    resp = requests.get(url, params=param, allow_redirects=True)
+                    if resp.is_redirect:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}SIMPLE PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_simple}\t RESULT : TRUE")
+                    else:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}SIMPLE PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_simple}\t RESULT : FALSE")
 
-                    if method == 'GET':
-                        resp = requests.get(url, params=param_simple, allow_redirects=True)
-                        if resp.is_redirect:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}SIMPLE PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_simple}\t PAYLOAD : {payload_simple}\t RESULT : TRUE")
-                        else:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}SIMPLE PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_simple}\t PAYLOAD : {payload_simple}\t RESULT : FALSE")
-
-                    elif method == 'POST':
-                        resp = requests.post(url, data=param_simple, allow_redirects=True)
-                        if resp.is_redirect:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}SIMPLE PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_simple}\t PAYLOAD : {payload_simple}\t RESULT : TRUE")
-                        else:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}SIMPLE PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_simple}\t PAYLOAD : {payload_simple}\t RESULT : FALSE")
+                elif method == 'POST':
+                    resp = requests.post(url, data=param, allow_redirects=True)
+                    if resp.is_redirect:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}SIMPLE PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_simple}\t RESULT : TRUE")
+                    else:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}SIMPLE PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_simple}\t RESULT : FALSE")
 
         else:
             print(f"{Style.BRIGHT}{Fore.BLUE}SIMPLE PAYLOAD DOESN'T WORKS{Style.RESET_ALL}")
 
     def execute_union(self, url, method, param, payloads):
         init()
-        union_result = self.checksqli_union(url, method, param)
-        if union_result:
-            url_union, method_union, param_union = union_result
+        for payload_union in payloads:
+            payload_union = payload_union.strip()
+            for key in param:
+                param[key] = payload_union
 
-            for payload_union in payloads:
-                payload_union = payload_union.strip()
-                for key in param_union:
-                    param_union[key] = payload_union
+                if method == 'GET':
+                    resp = requests.get(url, params=param, allow_redirects=True)
+                    if resp.is_redirect:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}UNION PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_union}\t RESULT : TRUE")
+                    else:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}UNION PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_union}\t RESULT : FALSE")
 
-                    if method == 'GET':
-                        resp = requests.get(url, params=param_union, allow_redirects=True)
-                        if resp.is_redirect:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}UNION PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_union}\t PAYLOAD : {payload_union}\t RESULT : TRUE")
-                        else:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}UNION PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_union}\t PAYLOAD : {payload_union}\t RESULT : FALSE")
-
-                    elif method == 'POST':
-                        resp = requests.post(url, data=param_union, allow_redirects=True)
-                        if resp.is_redirect:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}UNION PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_union}\t PAYLOAD : {payload_union}\t RESULT : TRUE")
-                        else:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}UNION PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_union}\t PAYLOAD : {payload_union}\t RESULT : FALSE")
+                elif method == 'POST':
+                    resp = requests.post(url, data=param, allow_redirects=True)
+                    if resp.is_redirect:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}UNION PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_union}\t RESULT : TRUE")
+                    else:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}UNION PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_union}\t RESULT : FALSE")
 
         else:
             print(f"{Style.BRIGHT}{Fore.BLUE}UNION_BASED PAYLOAD DOESN'T WORKS{Style.RESET_ALL}")
 
     def execute_error(self, url, method, param, payloads_error, payloads_blind):
         init()
-        error_result = self.checksqli_error(url, method, param)
-        if error_result:
-            url_error, method_error, param_error = error_result
+        for payload_error in payloads_error:
+            payload_error = payload_error.strip()
+            for key in param:
+                param[key] = payload_error
 
-            for payload_error in payloads_error:
-                payload_error = payload_error.strip()
-                for key in param_error:
-                    param_error[key] = payload_error
+                if method == 'GET':
+                    resp = requests.get(url, params=param, allow_redirects=True)
+                    if resp.status_code == 500 and 'Fuzzingzzing' in resp.text:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}ERROR PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payloads_error}\t RESULT : TRUE")
+                    else:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}ERROR PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payloads_error}\t RESULT : FALSE")
 
-                    if method == 'GET':
-                        resp = requests.get(url, params=param_error, allow_redirects=True)
-                        if resp.status_code == 500 and 'Fuzzingzzing' in resp.text:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}ERROR PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_error}\t PAYLOAD : {payloads_error}\t RESULT : TRUE")
-                        else:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}ERROR PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_error}\t PAYLOAD : {payloads_error}\t RESULT : FALSE")
+                elif method == 'POST':
+                    resp = requests.post(url, data=param, allow_redirects=True)
+                    if resp.status_code == 500 and 'Fuzzingzzing' in resp.text:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}ERROR PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payloads_error}\t RESULT : TRUE")
+                    else:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}ERROR PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payloads_error}\t RESULT : FALSE")
 
-                    elif method == 'POST':
-                        resp = requests.post(url, data=param_error, allow_redirects=True)
-                        if resp.status_code == 500 and 'Fuzzingzzing' in resp.text:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}ERROR PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_error}\t PAYLOAD : {payloads_error}\t RESULT : TRUE")
-                        else:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}ERROR PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_error}\t PAYLOAD : {payloads_error}\t RESULT : FALSE")
+                        # 이 부분도 애매해서 이후에 한번 더 봐야 할 듯
 
-                            # 이 부분도 애매해서 이후에 한번 더 봐야 할 듯
+        for payload_blind in payloads_blind:
+            payload_blind = payload_blind.strip()
+            for key in param:
+                param[key] = payload_blind
 
-            for payload_blind in payloads_blind:
-                payload_blind = payload_blind.strip()
-                for key in param_error:
-                    param_error[key] = payload_blind
+                if method == 'GET':
+                    resp = requests.get(url, params=param, allow_redirects=True)
+                    if resp.status_code == 200 and not resp.is_redirect:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_blind}\t RESULT : TRUE")
+                    else:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_blind}\t RESULT : FALSE")
 
-                    if method == 'GET':
-                        resp = requests.get(url, params=param_error, allow_redirects=True)
-                        if resp.status_code == 200 and not resp.is_redirect:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_error}\t PAYLOAD : {payload_blind}\t RESULT : TRUE")
-                        else:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_error}\t PAYLOAD : {payload_blind}\t RESULT : FALSE")
-
-                    elif method == 'POST':
-                        resp = requests.post(url, data=param_error, allow_redirects=True)
-                        if resp.status_code == 200 and not resp.is_redirect:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_error}\t PAYLOAD : {payload_blind}\t RESULT : TRUE")
-                        else:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_error}\t PAYLOAD : {payload_blind}\t RESULT : FALSE")
+                elif method == 'POST':
+                    resp = requests.post(url, data=param, allow_redirects=True)
+                    if resp.status_code == 200 and not resp.is_redirect:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_blind}\t RESULT : TRUE")
+                    else:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_blind}\t RESULT : FALSE")
 
         else:
             print(f"{Style.BRIGHT}{Fore.BLUE}ERROR_BASED PAYLOAD DOESN'T WORKS{Style.RESET_ALL}")
 
     def execute_time(self, url, method, param, payloads_time, payloads_blind):
         init()
-        time_result = self.checksqli_time(url, method, param)
-        if time_result:
-            url_time, method_time, param_time = time_result
+        for payload_time in payloads_time:
+            payload_time = payload_time.strip()
+            for key in param:
+                param[key] = payload_time
 
-            for payload_time in payloads_time:
-                payload_time = payload_time.strip()
-                for key in param_time:
-                    param_time[key] = payload_time
+                # Sleep(5)가 되면 True
+                if method == 'GET':
+                    start_time = time.time()
+                    resp = requests.get(url, params=param, allow_redirects=True)
+                    end_time = time.time() - start_time
+                    if int(end_time) >= 5:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}TIME PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_time}\t RESULT : TRUE")
+                    else:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}TIME PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_time}\t RESULT : FALSE")
 
-                    # Sleep(5)가 되면 True
-                    if method == 'GET':
-                        start_time = time.time()
-                        resp = requests.get(url, params=param_time, allow_redirects=True)
-                        end_time = time.time() - start_time
-                        if int(end_time) >= 5:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}TIME PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_time}\t PAYLOAD : {payload_time}\t RESULT : TRUE")
-                        else:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}TIME PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_time}\t PAYLOAD : {payload_time}\t RESULT : FALSE")
+                elif method == 'POST':
+                    start_time = time.time()
+                    resp = requests.post(url, data=param, allow_redirects=True)
+                    end_time = time.time() - start_time
+                    if int(end_time) >= 5:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}TIME PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_time}\t RESULT : TRUE")
+                    else:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}TIME PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_time}\t RESULT : FALSE")
 
-                    elif method == 'POST':
-                        start_time = time.time()
-                        resp = requests.post(url, data=param_time, allow_redirects=True)
-                        end_time = time.time() - start_time
-                        if int(end_time) >= 5:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}TIME PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_time}\t PAYLOAD : {payload_time}\t RESULT : TRUE")
-                        else:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}TIME PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_time}\t PAYLOAD : {payload_time}\t RESULT : FALSE")
+        for payload_blind in payloads_blind:
+            payload_blind = payload_blind.strip()
+            for key in param:
+                param[key] = payload_blind
 
-            for payload_blind in payloads_blind:
-                payload_blind = payload_blind.strip()
-                for key in param_time:
-                    param_time[key] = payload_blind
+                if method == 'GET':
+                    resp = requests.get(url, params=param, allow_redirects=True)
+                    if resp.status_code == 200 and not resp.is_redirect:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_blind}\t RESULT : TRUE")
+                    else:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_blind}\t RESULT : FALSE")
 
-                    if method == 'GET':
-                        resp = requests.get(url, params=param_time, allow_redirects=True)
-                        if resp.status_code == 200 and not resp.is_redirect:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_time}\t PAYLOAD : {payload_blind}\t RESULT : TRUE")
-                        else:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_time}\t PAYLOAD : {payload_blind}\t RESULT : FALSE")
-
-                    elif method == 'POST':
-                        resp = requests.post(url, data=param_time, allow_redirects=True)
-                        if resp.status_code == 200 and not resp.is_redirect:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_time}\t PAYLOAD : {payload_blind}\t RESULT : TRUE")
-                        else:
-                            print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_time}\t PAYLOAD : {payload_blind}\t RESULT : FALSE")
+                elif method == 'POST':
+                    resp = requests.post(url, data=param, allow_redirects=True)
+                    if resp.status_code == 200 and not resp.is_redirect:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_blind}\t RESULT : TRUE")
+                    else:
+                        print(f"{Style.BRIGHT}{Fore.BLUE}SQL INJECTION{Fore.RED}BLIND PAYLOAD{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload_blind}\t RESULT : FALSE")
         else:
             print(f"{Style.BRIGHT}{Fore.BLUE}TIME_BASED PAYLOAD DOESN'T WORKS{Style.RESET_ALL}")
 
-    def execute_injection(self, url, method, param, payloads_simple, payloads_union, payloads_blind, payloads_error, payloads_time):
-        self.execute_simple(url, method, param, payloads_simple)
-        self.execute_union(url, method, param, payloads_union)
-        self.execute_error(url, method, param, payloads_error, payloads_blind)
-        self.execute_time(url, method, param, payloads_time, payloads_blind)
+    def execute_sqli(self, url, method, param, payloads_simple, payloads_union, payloads_blind, payloads_error, payloads_time):
+
+        simple_result = self.checksqli_simple(url, method, param)
+        if simple_result:
+            url_simple, method_simple, param_simple = simple_result
+            print(f'EXECUTING SQL INJECTION FUZZING...\turl : {url_simple}\t\tmethod : {method_simple}\t\tparam : {param_simple}')
+            self.execute_simple(url_simple, method_simple, param_simple, payloads_simple)
+
+        union_result = self.checksqli_union(url, method, param)
+        if union_result:
+            url_union, method_union, param_union = union_result
+            print(f'EXECUTING SQL INJECTION FUZZING...\turl : {url_union}\t\tmethod : {method_union}\t\tparam : {param_union}')
+            self.execute_union(url_union, method_union, param_union, payloads_union)
+
+        error_result = self.checksqli_error(url, method, param)
+        if error_result:
+            url_error, method_error, param_error = error_result
+            print(f'EXECUTING SQL INJECTION FUZZING...\turl : {url_error}\t\tmethod : {method_error}\t\tparam : {param_error}')
+            self.execute_error(url_error, method_error, param_error, payloads_error, payloads_blind)
+
+        time_result = self.checksqli_time(url, method, param)
+        if time_result:
+            url_time, method_time, param_time = time_result
+            print(f'EXECUTING SQL INJECTION FUZZING...\turl : {url_time}\t\tmethod : {method_time}\t\tparam : {param_time}')
+            self.execute_time(url_time, method_time, param_time, payloads_time, payloads_blind)
 

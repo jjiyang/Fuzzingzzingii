@@ -3,7 +3,7 @@ import mysql.connector
 from urllib.parse import parse_qs, urlparse
 import json
 from colorama import init, Fore, Style
-import re
+
 
 class SSRF:
     def __init__(self):
@@ -19,7 +19,8 @@ class SSRF:
                          'https://mblogthumb-phinf.pstatic.net/MjAyMTAxMDdfMjE3/MDAxNjEwMDEyMzAzMjI2.sAWMz0e4a_3ZN6Gj1rOumFSUUWHa-uUr388r1hX7sv4g.DN5bE9vCSBb92VmyEMrGWwMfz6l8tDWxBlSMhHAhZlog.JPEG.hiyuns00/IMG_8903.JPG?type=w800',
                          ]
 
-        self.file = open('./payloads/SSRF/ssrf_payloads.txt', 'r')
+        self.ssrf_payload = open('./payloads/SSRF/ssrf_payloads.txt', 'r')
+        self.ssrf_whitelist_payload = open('./payloads/SSRF/ssrf_whitelist_payloads.txt', 'r')
         self.connection = None
         self.cursor = None
 
@@ -47,6 +48,9 @@ class SSRF:
 
         return url_list
 
+    # def check_vector(self, param):
+
+
     def get_params(self, url):
         result = []
 
@@ -55,6 +59,20 @@ class SSRF:
 
         return result
 
+    def get_payloads(self):
+        basic_payloads = []
+        white_payloads = []
+
+        basic = self.ssrf_payload.readlines()
+        white = self.ssrf_whitelist_payload.readlines()
+
+        for b in basic:
+            basic_payloads.append(b.strip())
+        for w in white:
+            white_payloads.append(w.strip())
+
+        return basic_payloads, white_payloads
+
     def check_ssrf(self, url, method, param):
         if param:
             param = parse_qs(param)
@@ -62,44 +80,77 @@ class SSRF:
             for payload in self.payloads:
                 for key in param:
                     param[key] = payload
+                    print(f'CHECKING...\turl : {url}\t\tmethod : {method}\t\tpayload : {param}')
 
                     if method == 'GET':
                         resp = requests.get(url, params=param)
                         if resp.status_code == 200:
+                            print(f"Checked Basic payload = {payload}")
                             return url, method, param
 
                     elif method == 'POST':
                         resp = requests.post(url, data=param)
                         if resp.status_code == 200:
+                            print(f"Checked Basic payload = {payload}")
                             return url, method, param
 
-        return url, method, param
+        return False
 
-    def execute_ssrf(self, url, method, param, payloads):
+    def execute_whitelist(self, url, method, param, payloads):
         init()
         # SIMPLE
-        ssrf_result = self.check_ssrf(url, method, param)
 
-        if ssrf_result:
-            url_result, method_result, param_result = ssrf_result
+        for payload in payloads:
+            payload = payload.strip()
+            for key in param.keys():
+                param[key] = payload
 
-            for payload in payloads:
-                payload = payload.strip()
-                for key in param_result.keys():
-                    param_result[key] = payload
+                if method == 'GET':
+                    resp = requests.get(url, params=param)
+                    if resp.status_code == 200:
+                        print(f"{Style.BRIGHT}{Fore.RED}SSRF Vulnerability Found{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload}\t RESULT : TRUE")
 
-                    if method == 'GET':
-                        resp = requests.get(url, params=param_result)
-                        if resp.status_code == 200:
-                            print(f"{Style.BRIGHT}{Fore.RED}SSRF Vulnerability Found{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_result}\t PAYLOAD : {payload}\t RESULT : TRUE")
-
-                    elif method == 'POST':
-                        resp = requests.post(url, data=param_result)
-                        if resp.status_code == 200:
-                            print(f"{Style.BRIGHT}{Fore.RED}SSRF Vulnerability Found{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param_result}\t PAYLOAD : {payload}\t RESULT : TRUE")
+                elif method == 'POST':
+                    resp = requests.post(url, data=param)
+                    if resp.status_code == 200:
+                        print(f"{Style.BRIGHT}{Fore.RED}SSRF Vulnerability Found{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload}\t RESULT : TRUE")
 
         else:
             print(f"{Style.BRIGHT}{Fore.BLUE}!!!\tThere is no SSRF Vulnerability\t!!!{Style.RESET_ALL}")
 
+    def execute_injection(self, url, method, param, payloads):
+        init()
+        # SIMPLE
+
+        for payload in payloads:
+            payload = payload.strip()
+            url += payload
+
+            if method == 'GET':
+                resp = requests.get(url, params=param)
+                if resp.status_code == 200:
+                    print(
+                        f"{Style.BRIGHT}{Fore.RED}SSRF Vulnerability Found{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload}\t RESULT : TRUE")
+
+            elif method == 'POST':
+                resp = requests.post(url, data=param)
+                if resp.status_code == 200:
+                    print(
+                        f"{Style.BRIGHT}{Fore.RED}SSRF Vulnerability Found{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload}\t RESULT : TRUE")
+
+        else:
+            print(f"{Style.BRIGHT}{Fore.BLUE}!!!\tThere is no SSRF Vulnerability\t!!!{Style.RESET_ALL}")
+
+    def execute_ssrf(self, url, method, param, basic_payloads, white_payloads):
+        check_result = self.check_ssrf(url, method, param)
+
+        if check_result:
+            checked_url, checked_method, checked_param = check_result
+            print(f'EXECUTING SSRF FUZZING...\turl : {checked_url}\t\tmethod : {checked_method}\t\tparam : {checked_param}')
+            self.execute_injection(checked_url, checked_method, checked_param, basic_payloads)
+            self.execute_whitelist(checked_url, checked_method, checked_param, white_payloads)
+
     def close_file(self):
-        self.file.close()
+        self.ssrf_whitelist_payload.close()
+        self.ssrf_payload.close()
+
