@@ -1,0 +1,280 @@
+2024-07-08 21:42:04,589 - request_handler - INFO - Intercepting HTTPS connection for: www.naver.com
+2024-07-08 21:42:04,589 - request_handler - INFO - Intercepting SSL for hostname: www.naver.com
+2024-07-08 21:42:04,590 - request_handler - DEBUG - Certificate path: ./certs/www.naver.com.pem
+2024-07-08 21:42:04,590 - request_handler - DEBUG - Config path: ./certs/www.naver.com.conf
+2024-07-08 21:42:04,600 - request_handler - INFO - SSL interception successful for www.naver.com
+2024-07-08 21:42:04,600 - request_handler - INFO - SSL interception completed for www.naver.com
+2024-07-08 21:42:04,601 - request_handler - INFO - Processing GET request for URL: /
+2024-07-08 21:42:04,706 - request_handler - INFO - Finishing request handling
+2024-07-08 21:42:04,707 - request_handler - ERROR - code 400, message Bad request syntax ('\x17\x03\x03\x00\x13\x07\x7fo`ö\x11;\x96ÈLíæÕcÍ\x8bUÈ]')
+2024-07-08 21:42:04,707 - request_handler - ERROR - Error parsing request: [Errno 32] Broken pipe
+2024-07-08 21:42:04,709 - request_handler - DEBUG - Traceback (most recent call last):
+  File "/mnt/c/proxy/request_handler.py", line 54, in parse_request
+    return super().parse_request()
+  File "/usr/lib/python3.10/http/server.py", line 320, in parse_request
+    self.send_error(
+  File "/usr/lib/python3.10/http/server.py", line 488, in send_error
+    self.wfile.write(body)
+  File "/usr/lib/python3.10/socket.py", line 723, in write
+    return self._sock.send(b)
+  File "/usr/lib/python3.10/ssl.py", line 1237, in send
+    return super().send(data, flags)
+BrokenPipeError: [Errno 32] Broken pipe
+
+2024-07-08 21:42:15,788 - request_handler - INFO - Intercepting HTTPS connection for: www.naver.com
+2024-07-08 21:42:15,788 - request_handler - INFO - Intercepting SSL for hostname: www.naver.com
+2024-07-08 21:42:15,788 - request_handler - DEBUG - Certificate path: ./certs/www.naver.com.pem
+2024-07-08 21:42:15,789 - request_handler - DEBUG - Config path: ./certs/www.naver.com.conf
+2024-07-08 21:42:15,800 - request_handler - INFO - SSL interception successful for www.naver.com
+2024-07-08 21:42:15,801 - request_handler - INFO - SSL interception completed for www.naver.com
+2024-07-08 21:42:15,801 - request_handler - INFO - Processing GET request for URL: /
+2024-07-08 21:42:15,925 - request_handler - INFO - Finishing request handling
+2024-07-08 21:42:15,926 - request_handler - ERROR - code 400, message Bad request syntax ("\x17\x03\x03\x00\x13\x99±¦WÒ\x00®-¨Öè3Õ«'²»ÚZ")
+2024-07-08 21:42:15,926 - request_handler - ERROR - Error parsing request: [Errno 32] Broken pipe
+2024-07-08 21:42:15,927 - request_handler - DEBUG - Traceback (most recent call last):
+  File "/mnt/c/proxy/request_handler.py", line 54, in parse_request
+    return super().parse_request()
+  File "/usr/lib/python3.10/http/server.py", line 320, in parse_request
+    self.send_error(
+  File "/usr/lib/python3.10/http/server.py", line 488, in send_error
+    self.wfile.write(body)
+  File "/usr/lib/python3.10/socket.py", line 723, in write
+    return self._sock.send(b)
+  File "/usr/lib/python3.10/ssl.py", line 1237, in send
+    return super().send(data, flags)
+BrokenPipeError: [Errno 32] Broken pipe
+
+2024-07-08 21:42:25,770 - request_handler - INFO - Intercepting HTTPS connection for: www.google.com
+2024-07-08 21:42:25,770 - request_handler - INFO - Intercepting SSL for hostname: www.google.com
+2024-07-08 21:42:25,771 - request_handler - DEBUG - Certificate path: ./certs/www.google.com.pem
+2024-07-08 21:42:25,771 - request_handler - DEBUG - Config path: ./certs/www.google.com.conf
+2024-07-08 21:42:25,785 - request_handler - INFO - SSL interception successful for www.google.com
+2024-07-08 21:42:25,785 - request_handler - INFO - SSL interception completed for www.google.com
+2024-07-08 21:42:25,785 - request_handler - INFO - Processing GET request for URL: /
+2024-07-08 21:42:26,286 - request_handler - INFO - Attempting to store data for URL: https://www.google.com/
+2024-07-08 21:42:26,286 - request_handler - INFO - Entering store_request_data for URL: https://www.google.com/
+2024-07-08 21:42:26,291 - request_handler - INFO - Executing SQL query for URL: https://www.google.com/
+2024-07-08 21:42:26,319 - request_handler - INFO - Data successfully stored in database for URL: https://www.google.com/
+2024-07-08 21:42:26,319 - request_handler - INFO - Exiting store_request_data for URL: https://www.google.com/
+2024-07-08 21:42:26,320 - request_handler - INFO - Request processing completed for URL: https://www.google.com/
+2024-07-08 21:42:26,320 - request_handler - INFO - Finishing request handling
+2024-07-08 21:42:26,320 - request_handler - ERROR - code 400, message Bad request syntax ('\x17\x03\x03\x00\x13Ê\x08òë\x0e½#Ø)g\x91\x9aÂ¨gºmOj')
+2024-07-08 21:42:26,320 - request_handler - ERROR - Error parsing request: [Errno 32] Broken pipe
+2024-07-08 21:42:26,321 - request_handler - DEBUG - Traceback (most recent call last):
+  File "/mnt/c/proxy/request_handler.py", line 54, in parse_request
+    return super().parse_request()
+  File "/usr/lib/python3.10/http/server.py", line 320, in parse_request
+    self.send_error(
+  File "/usr/lib/python3.10/http/server.py", line 488, in send_error
+    self.wfile.write(body)
+  File "/usr/lib/python3.10/socket.py", line 723, in write
+    return self._sock.send(b)
+  File "/usr/lib/python3.10/ssl.py", line 1237, in send
+    return super().send(data, flags)
+BrokenPipeError: [Errno 32] Broken pipe
+
+2024-07-08 22:03:44,260 - request_handler - INFO - Intercepting HTTPS connection for: www.naver.com
+2024-07-08 22:03:44,260 - request_handler - INFO - Intercepting SSL for hostname: www.naver.com
+2024-07-08 22:03:44,261 - request_handler - DEBUG - Certificate path: ./certs/www.naver.com.pem
+2024-07-08 22:03:44,261 - request_handler - DEBUG - Config path: ./certs/www.naver.com.conf
+2024-07-08 22:03:44,268 - request_handler - INFO - SSL interception successful for www.naver.com
+2024-07-08 22:03:44,268 - request_handler - INFO - SSL interception completed for www.naver.com
+2024-07-08 22:03:44,269 - request_handler - INFO - Starting to process GET request for URL: /
+2024-07-08 22:03:44,381 - request_handler - INFO - Finishing request handling
+2024-07-08 22:03:44,382 - request_handler - ERROR - code 400, message Bad request syntax ('\x17\x03\x03\x00\x13§åµr¦\xadà$C\x97½$XSÑj\x05ù?')
+2024-07-08 22:03:44,382 - request_handler - ERROR - Error parsing request: [Errno 32] Broken pipe
+2024-07-08 22:03:44,384 - request_handler - DEBUG - Traceback (most recent call last):
+  File "/mnt/c/proxy/request_handler.py", line 54, in parse_request
+    return super().parse_request()
+  File "/usr/lib/python3.10/http/server.py", line 320, in parse_request
+    self.send_error(
+  File "/usr/lib/python3.10/http/server.py", line 488, in send_error
+    self.wfile.write(body)
+  File "/usr/lib/python3.10/socket.py", line 723, in write
+    return self._sock.send(b)
+  File "/usr/lib/python3.10/ssl.py", line 1237, in send
+    return super().send(data, flags)
+BrokenPipeError: [Errno 32] Broken pipe
+
+2024-07-08 22:03:51,564 - request_handler - INFO - Intercepting HTTPS connection for: www.naver.com
+2024-07-08 22:03:51,564 - request_handler - INFO - Intercepting SSL for hostname: www.naver.com
+2024-07-08 22:03:51,565 - request_handler - DEBUG - Certificate path: ./certs/www.naver.com.pem
+2024-07-08 22:03:51,565 - request_handler - DEBUG - Config path: ./certs/www.naver.com.conf
+2024-07-08 22:03:51,577 - request_handler - INFO - SSL interception successful for www.naver.com
+2024-07-08 22:03:51,577 - request_handler - INFO - SSL interception completed for www.naver.com
+2024-07-08 22:03:51,578 - request_handler - INFO - Starting to process GET request for URL: /
+2024-07-08 22:03:51,683 - request_handler - INFO - Finishing request handling
+2024-07-08 22:03:51,683 - request_handler - ERROR - code 400, message Bad request syntax ('\x17\x03\x03\x00\x13\x8dØf¾ºó^Ñaâ\x06l¬&\x8ao\x07µ}')
+2024-07-08 22:03:51,683 - request_handler - ERROR - Error parsing request: [Errno 32] Broken pipe
+2024-07-08 22:03:51,686 - request_handler - DEBUG - Traceback (most recent call last):
+  File "/mnt/c/proxy/request_handler.py", line 54, in parse_request
+    return super().parse_request()
+  File "/usr/lib/python3.10/http/server.py", line 320, in parse_request
+    self.send_error(
+  File "/usr/lib/python3.10/http/server.py", line 488, in send_error
+    self.wfile.write(body)
+  File "/usr/lib/python3.10/socket.py", line 723, in write
+    return self._sock.send(b)
+  File "/usr/lib/python3.10/ssl.py", line 1237, in send
+    return super().send(data, flags)
+BrokenPipeError: [Errno 32] Broken pipe
+
+2024-07-08 22:20:09,612 - request_handler - INFO - Intercepting HTTPS connection for: www.daum.net
+2024-07-08 22:20:09,612 - request_handler - INFO - Intercepting SSL for hostname: www.daum.net
+2024-07-08 22:20:09,613 - request_handler - DEBUG - Certificate path: ./certs/www.daum.net.pem
+2024-07-08 22:20:09,613 - request_handler - DEBUG - Config path: ./certs/www.daum.net.conf
+2024-07-08 22:20:09,615 - request_handler - INFO - Certificate not found, generating new one for www.daum.net
+2024-07-08 22:20:09,619 - request_handler - INFO - Generating certificate for www.daum.net
+2024-07-08 22:20:09,620 - request_handler - DEBUG - Certificate path: ./certs/www.daum.net.pem
+2024-07-08 22:20:09,620 - request_handler - DEBUG - Config path: ./certs/www.daum.net.conf
+2024-07-08 22:20:09,620 - request_handler - DEBUG - CSR command: openssl req -new -key ./cert-key.pem -subj /CN=www.daum.net
+2024-07-08 22:20:09,633 - request_handler - DEBUG - Certificate signing command: openssl x509 -req -days 365 -CA ./ca-cert.pem -CAkey ./ca-key.pem -set_serial 1720444809619 -out ./certs/www.daum.net.pem -extfile ./certs/www.daum.net.conf
+2024-07-08 22:20:09,648 - request_handler - INFO - Certificate generated successfully for www.daum.net
+2024-07-08 22:20:09,661 - request_handler - INFO - SSL interception successful for www.daum.net
+2024-07-08 22:20:09,662 - request_handler - INFO - SSL interception completed for www.daum.net
+2024-07-08 22:20:09,662 - request_handler - INFO - Starting to process GET request for URL: /
+2024-07-08 22:20:09,952 - request_handler - INFO - Attempting to store data for URL: https://www.daum.net/
+2024-07-08 22:20:09,952 - request_handler - INFO - Entering store_request_data for URL: https://www.daum.net/
+2024-07-08 22:20:09,958 - request_handler - INFO - Executing SQL query for URL: https://www.daum.net/
+2024-07-08 22:20:10,371 - request_handler - INFO - Data successfully stored in database for URL: https://www.daum.net/
+2024-07-08 22:20:10,371 - request_handler - INFO - Exiting store_request_data for URL: https://www.daum.net/
+2024-07-08 22:20:10,372 - request_handler - INFO - Request processing completed for URL: https://www.daum.net/
+2024-07-08 22:20:10,372 - request_handler - INFO - Finishing request handling
+2024-07-08 22:20:10,372 - request_handler - ERROR - code 400, message Bad request syntax ('\x17\x03\x03\x00\x13Îÿ\x95\x9b;Á-a\x8cX\x82\x99iÝM3ð\x18Ä')
+2024-07-08 22:20:10,373 - request_handler - ERROR - Error parsing request: [Errno 32] Broken pipe
+2024-07-08 22:20:10,376 - request_handler - DEBUG - Traceback (most recent call last):
+  File "/mnt/c/proxy/request_handler.py", line 54, in parse_request
+    return super().parse_request()
+  File "/usr/lib/python3.10/http/server.py", line 320, in parse_request
+    self.send_error(
+  File "/usr/lib/python3.10/http/server.py", line 488, in send_error
+    self.wfile.write(body)
+  File "/usr/lib/python3.10/socket.py", line 723, in write
+    return self._sock.send(b)
+  File "/usr/lib/python3.10/ssl.py", line 1237, in send
+    return super().send(data, flags)
+BrokenPipeError: [Errno 32] Broken pipe
+
+2024-07-08 22:20:54,352 - request_handler - INFO - Intercepting HTTPS connection for: www.daum.net
+2024-07-08 22:20:54,352 - request_handler - INFO - Intercepting SSL for hostname: www.daum.net
+2024-07-08 22:20:54,352 - request_handler - DEBUG - Certificate path: ./certs/www.daum.net.pem
+2024-07-08 22:20:54,353 - request_handler - DEBUG - Config path: ./certs/www.daum.net.conf
+2024-07-08 22:20:54,364 - request_handler - INFO - SSL interception successful for www.daum.net
+2024-07-08 22:20:54,364 - request_handler - INFO - SSL interception completed for www.daum.net
+2024-07-08 22:20:54,365 - request_handler - INFO - Starting to process GET request for URL: /
+2024-07-08 22:20:54,653 - request_handler - INFO - Attempting to store data for URL: https://www.daum.net/
+2024-07-08 22:20:54,654 - request_handler - INFO - Entering store_request_data for URL: https://www.daum.net/
+2024-07-08 22:20:54,658 - request_handler - INFO - Executing SQL query for URL: https://www.daum.net/
+2024-07-08 22:20:55,062 - request_handler - INFO - Data successfully stored in database for URL: https://www.daum.net/
+2024-07-08 22:20:55,062 - request_handler - INFO - Exiting store_request_data for URL: https://www.daum.net/
+2024-07-08 22:20:55,062 - request_handler - INFO - Request processing completed for URL: https://www.daum.net/
+2024-07-08 22:20:55,062 - request_handler - INFO - Finishing request handling
+2024-07-08 22:20:55,062 - request_handler - ERROR - code 400, message Bad HTTP/0.9 request type ('\x17\x03\x03\x00\x13¥\x92¾v')
+2024-07-08 22:20:55,063 - request_handler - ERROR - Error parsing request: [Errno 32] Broken pipe
+2024-07-08 22:20:55,065 - request_handler - DEBUG - Traceback (most recent call last):
+  File "/mnt/c/proxy/request_handler.py", line 54, in parse_request
+    return super().parse_request()
+  File "/usr/lib/python3.10/http/server.py", line 328, in parse_request
+    self.send_error(
+  File "/usr/lib/python3.10/http/server.py", line 488, in send_error
+    self.wfile.write(body)
+  File "/usr/lib/python3.10/socket.py", line 723, in write
+    return self._sock.send(b)
+  File "/usr/lib/python3.10/ssl.py", line 1237, in send
+    return super().send(data, flags)
+BrokenPipeError: [Errno 32] Broken pipe
+
+2024-07-08 22:22:32,371 - request_handler - INFO - Intercepting HTTPS connection for: www.netflix.com
+2024-07-08 22:22:32,372 - request_handler - INFO - Intercepting SSL for hostname: www.netflix.com
+2024-07-08 22:22:32,372 - request_handler - DEBUG - Certificate path: ./certs/www.netflix.com.pem
+2024-07-08 22:22:32,373 - request_handler - DEBUG - Config path: ./certs/www.netflix.com.conf
+2024-07-08 22:22:32,374 - request_handler - INFO - Certificate not found, generating new one for www.netflix.com
+2024-07-08 22:22:32,376 - request_handler - INFO - Generating certificate for www.netflix.com
+2024-07-08 22:22:32,377 - request_handler - DEBUG - Certificate path: ./certs/www.netflix.com.pem
+2024-07-08 22:22:32,377 - request_handler - DEBUG - Config path: ./certs/www.netflix.com.conf
+2024-07-08 22:22:32,377 - request_handler - DEBUG - CSR command: openssl req -new -key ./cert-key.pem -subj /CN=www.netflix.com
+2024-07-08 22:22:32,385 - request_handler - DEBUG - Certificate signing command: openssl x509 -req -days 365 -CA ./ca-cert.pem -CAkey ./ca-key.pem -set_serial 1720444952376 -out ./certs/www.netflix.com.pem -extfile ./certs/www.netflix.com.conf
+2024-07-08 22:22:32,398 - request_handler - INFO - Certificate generated successfully for www.netflix.com
+2024-07-08 22:22:32,410 - request_handler - INFO - SSL interception successful for www.netflix.com
+2024-07-08 22:22:32,410 - request_handler - INFO - SSL interception completed for www.netflix.com
+2024-07-08 22:22:32,410 - request_handler - INFO - Starting to process GET request for URL: /kr/
+2024-07-08 22:22:34,265 - request_handler - INFO - Finishing request handling
+2024-07-08 22:22:34,266 - request_handler - ERROR - code 400, message Bad HTTP/0.9 request type ('\x17\x03\x03\x00\x13èS\x98Øø¤ä')
+2024-07-08 22:22:34,266 - request_handler - ERROR - Error parsing request: [Errno 32] Broken pipe
+2024-07-08 22:22:34,267 - request_handler - DEBUG - Traceback (most recent call last):
+  File "/mnt/c/proxy/request_handler.py", line 54, in parse_request
+    return super().parse_request()
+  File "/usr/lib/python3.10/http/server.py", line 328, in parse_request
+    self.send_error(
+  File "/usr/lib/python3.10/http/server.py", line 488, in send_error
+    self.wfile.write(body)
+  File "/usr/lib/python3.10/socket.py", line 723, in write
+    return self._sock.send(b)
+  File "/usr/lib/python3.10/ssl.py", line 1237, in send
+    return super().send(data, flags)
+BrokenPipeError: [Errno 32] Broken pipe
+
+2024-07-08 22:23:02,558 - request_handler - INFO - Intercepting HTTPS connection for: www.google.com
+2024-07-08 22:23:02,558 - request_handler - INFO - Intercepting SSL for hostname: www.google.com
+2024-07-08 22:23:02,559 - request_handler - DEBUG - Certificate path: ./certs/www.google.com.pem
+2024-07-08 22:23:02,559 - request_handler - DEBUG - Config path: ./certs/www.google.com.conf
+2024-07-08 22:23:02,571 - request_handler - INFO - SSL interception successful for www.google.com
+2024-07-08 22:23:02,571 - request_handler - INFO - SSL interception completed for www.google.com
+2024-07-08 22:23:02,572 - request_handler - INFO - Starting to process GET request for URL: /
+2024-07-08 22:23:03,077 - request_handler - INFO - Attempting to store data for URL: https://www.google.com/
+2024-07-08 22:23:03,078 - request_handler - INFO - Entering store_request_data for URL: https://www.google.com/
+2024-07-08 22:23:03,082 - request_handler - INFO - Executing SQL query for URL: https://www.google.com/
+2024-07-08 22:23:03,111 - request_handler - INFO - Data successfully stored in database for URL: https://www.google.com/
+2024-07-08 22:23:03,111 - request_handler - INFO - Exiting store_request_data for URL: https://www.google.com/
+2024-07-08 22:23:03,111 - request_handler - INFO - Request processing completed for URL: https://www.google.com/
+2024-07-08 22:23:03,111 - request_handler - INFO - Finishing request handling
+2024-07-08 22:23:03,112 - request_handler - ERROR - code 400, message Bad HTTP/0.9 request type ('\x17\x03\x03\x00\x13Õ\x8f6©\x00')
+2024-07-08 22:23:03,112 - request_handler - ERROR - Error parsing request: [Errno 32] Broken pipe
+2024-07-08 22:23:03,113 - request_handler - DEBUG - Traceback (most recent call last):
+  File "/mnt/c/proxy/request_handler.py", line 54, in parse_request
+    return super().parse_request()
+  File "/usr/lib/python3.10/http/server.py", line 328, in parse_request
+    self.send_error(
+  File "/usr/lib/python3.10/http/server.py", line 488, in send_error
+    self.wfile.write(body)
+  File "/usr/lib/python3.10/socket.py", line 723, in write
+    return self._sock.send(b)
+  File "/usr/lib/python3.10/ssl.py", line 1237, in send
+    return super().send(data, flags)
+BrokenPipeError: [Errno 32] Broken pipe
+
+2024-07-08 22:28:35,397 - request_handler - INFO - Intercepting HTTPS connection for: www.naver.com
+2024-07-08 22:28:35,398 - request_handler - INFO - Intercepting SSL for hostname: www.naver.com
+2024-07-08 22:28:35,398 - request_handler - DEBUG - Certificate path: ./certs/www.naver.com.pem
+2024-07-08 22:28:35,398 - request_handler - DEBUG - Config path: ./certs/www.naver.com.conf
+2024-07-08 22:28:35,409 - request_handler - INFO - SSL interception successful for www.naver.com
+2024-07-08 22:28:35,409 - request_handler - INFO - SSL interception completed for www.naver.com
+2024-07-08 22:30:09,932 - request_handler - INFO - Intercepting HTTPS connection for: www.naver.com
+2024-07-08 22:30:09,932 - request_handler - INFO - Intercepting SSL for hostname: www.naver.com
+2024-07-08 22:30:09,932 - request_handler - DEBUG - Certificate path: ./certs/www.naver.com.pem
+2024-07-08 22:30:09,933 - request_handler - DEBUG - Config path: ./certs/www.naver.com.conf
+2024-07-08 22:30:09,943 - request_handler - INFO - SSL interception successful for www.naver.com
+2024-07-08 22:30:09,944 - request_handler - INFO - SSL interception completed for www.naver.com
+2024-07-08 22:31:01,916 - request_handler - INFO - Intercepting HTTPS connection for: www.naver.com
+2024-07-08 22:31:01,917 - request_handler - INFO - Intercepting SSL for hostname: www.naver.com
+2024-07-08 22:31:01,917 - request_handler - DEBUG - Certificate path: ./certs/www.naver.com.pem
+2024-07-08 22:31:01,917 - request_handler - DEBUG - Config path: ./certs/www.naver.com.conf
+2024-07-08 22:31:01,924 - request_handler - INFO - SSL interception successful for www.naver.com
+2024-07-08 22:31:01,925 - request_handler - INFO - SSL interception completed for www.naver.com
+2024-07-08 22:31:01,925 - request_handler - INFO - Starting to process GET request for URL: /
+2024-07-08 22:31:02,040 - request_handler - INFO - Finishing request handling
+2024-07-08 22:31:02,041 - request_handler - ERROR - code 400, message Bad HTTP/0.9 request type ('\x17\x03\x03\x00\x13z')
+2024-07-08 22:31:02,041 - request_handler - ERROR - Error parsing request: [Errno 32] Broken pipe
+2024-07-08 22:31:02,042 - request_handler - DEBUG - Traceback (most recent call last):
+  File "/mnt/c/proxy/request_handler.py", line 54, in parse_request
+    return super().parse_request()
+  File "/usr/lib/python3.10/http/server.py", line 328, in parse_request
+    self.send_error(
+  File "/usr/lib/python3.10/http/server.py", line 488, in send_error
+    self.wfile.write(body)
+  File "/usr/lib/python3.10/socket.py", line 723, in write
+    return self._sock.send(b)
+  File "/usr/lib/python3.10/ssl.py", line 1237, in send
+    return super().send(data, flags)
+BrokenPipeError: [Errno 32] Broken pipe
+

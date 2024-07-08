@@ -2,18 +2,18 @@ import urllib.parse
 import json
 import re
 
-RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN = 31, 32, 33, 34, 35, 36
+ANSI_GREEN, ANSI_ORANGE, ANSI_PURPLE = 32, 91, 35
 
-def with_color(c: int, s: str):
-    return f"\x1b[{c}m{s}\x1b[0m"
+def colorize(color_code: int, text: str):
+    return f"\x1b[{color_code}m{text}\x1b[0m"
 
-def parse_qsl(s):
+def parse_query_string(query_string):
     return "\n".join(
-        "%-20s %s" % (k, v)
-        for k, v in urllib.parse.parse_qsl(s, keep_blank_values=True)
+        f"%-20s %s" % (k, v)
+        for k, v in urllib.parse.parse_qsl(query_string, keep_blank_values=True)
     )
 
-def print_info(req, req_body, res, res_body):
+def log_request_info(req, req_body, res, res_body):
     req_header_text = "%s %s %s\n%s" % (
         req.command,
         req.path,
@@ -28,29 +28,29 @@ def print_info(req, req_body, res, res_body):
         res.headers,
     )
 
-    print(with_color(YELLOW, req_header_text))
+    print(colorize(ANSI_ORANGE, req_header_text))
 
-    u = urllib.parse.urlsplit(req.path)
-    if u.query:
-        query_text = parse_qsl(u.query)
-        print(with_color(GREEN, "==== QUERY PARAMETERS ====\n%s\n" % query_text))
+    url_parts = urllib.parse.urlsplit(req.path)
+    if url_parts.query:
+        query_text = parse_query_string(url_parts.query)
+        print(colorize(ANSI_GREEN, "==== QUERY PARAMETERS ====\n%s\n" % query_text))
 
     cookie = req.headers.get("Cookie", "")
     if cookie:
-        cookie = parse_qsl(re.sub(r";\s*", "&", cookie))
-        print(with_color(GREEN, "==== COOKIE ====\n%s\n" % cookie))
+        cookie = parse_query_string(re.sub(r";\s*", "&", cookie))
+        print(colorize(ANSI_GREEN, "==== COOKIE ====\n%s\n" % cookie))
 
     auth = req.headers.get("Authorization", "")
     if auth.lower().startswith("basic"):
         token = auth.split()[1].decode("base64")
-        print(with_color(RED, "==== BASIC AUTH ====\n%s\n" % token))
+        print(colorize(ANSI_PURPLE, "==== BASIC AUTH ====\n%s\n" % token))
 
-    if req_body is not None:
+    if req_body:
         req_body_text = None
         content_type = req.headers.get("Content-Type", "")
 
         if content_type.startswith("application/x-www-form-urlencoded"):
-            req_body_text = parse_qsl(req_body)
+            req_body_text = parse_query_string(req_body)
         elif content_type.startswith("application/json"):
             try:
                 json_obj = json.loads(req_body)
@@ -69,15 +69,15 @@ def print_info(req, req_body, res, res_body):
             req_body_text = req_body
 
         if req_body_text:
-            print(with_color(GREEN, "==== REQUEST BODY ====\n%s\n" % req_body_text))
+            print(colorize(ANSI_GREEN, "==== REQUEST BODY ====\n%s\n" % req_body_text))
 
-    print(with_color(CYAN, res_header_text))
+    print(colorize(ANSI_PURPLE, res_header_text))
 
     cookies = res.headers.get("Set-Cookie")
     if cookies:
-        print(with_color(RED, "==== SET-COOKIE ====\n%s\n" % cookies))
+        print(colorize(ANSI_PURPLE, "==== SET-COOKIE ====\n%s\n" % cookies))
 
-    if res_body is not None:
+    if res_body:
         res_body_text = None
         content_type = res.headers.get("Content-Type", "")
 
@@ -99,12 +99,12 @@ def print_info(req, req_body, res, res_body):
             m = re.search(rb"<title[^>]*>\s*([^<]+?)\s*</title>", res_body, re.I)
             if m:
                 print(
-                    with_color(
-                        GREEN, "==== HTML TITLE ====\n%s\n" % m.group(1).decode()
+                    colorize(
+                        ANSI_GREEN, "==== HTML TITLE ====\n%s\n" % m.group(1).decode()
                     )
                 )
         elif content_type.startswith("text/") and len(res_body) < 1024:
             res_body_text = res_body
 
         if res_body_text:
-            print(with_color(GREEN, "==== RESPONSE BODY ====\n%s\n" % res_body_text))
+            print(colorize(ANSI_GREEN, "==== RESPONSE BODY ====\n%s\n" % res_body_text))
