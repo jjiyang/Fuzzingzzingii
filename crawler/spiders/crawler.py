@@ -1,92 +1,132 @@
-# crawler.py_javascript+proxy
 import scrapy
 import tldextract
 from urllib.parse import urlparse, parse_qs, urlunparse, urlencode
-import logging
 from scrapy.http import HtmlResponse
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+import requests
 
 class MySpider(scrapy.Spider):
     name = 'crawler'
 
-    def __init__(self, start_url=None, *args, **kwargs):
+    def __init__(self, start_url=None, login_url=None, username=None, password=None, *args, **kwargs):
         super(MySpider, self).__init__(*args, **kwargs)
 
         if start_url:
-            self.start_urls = [start_url]  # 시작URL 설정
+            self.start_urls = [start_url]
         else:
-            raise ValueError("No start URL provided")  # 시작URL 없을 경우 예외 발생
+            raise ValueError("No start URL provided")
 
-        self.domain_origin = tldextract.extract(self.start_urls[0]).domain  # 도메인 추출
-        self.output = open('output.txt', 'w')  # 출력파일 열기
-        self.seen_urls = set()  # 수집된 URL 저장할 집합
+        if not login_url or not username or not password:
+            raise ValueError("Login URL, username, and password must be provided")
 
-        # Selenium WebDriver 초기화
+        self.login_url = login_url
+        self.username = username
+        self.password = password
+
+        self.domain_origin = tldextract.extract(self.start_urls[0]).domain
+        self.output_file = 'output.txt'
+        self.seen_urls = set()
+
+        chrome_driver_path = './chromedriver'
+        self.service = Service(chrome_driver_path)
+
         chrome_options = Options()
-        chrome_options.add_argument("--headless")  # 헤드리스 모드로 실행
+        chrome_options.add_argument("--headless")
         
-        # 프록시 설정 추가
-        proxy = 'http://your_proxy:your_port'
+        proxy = 'http://13.209.63.65:8888'
         chrome_options.add_argument(f'--proxy-server={proxy}')
-        
-        self.driver = webdriver.Chrome(options=chrome_options)
+
+        self.driver = webdriver.Chrome(service=self.service, options=chrome_options)
+
+        self.login()
+
+    def login(self):
+        self.driver.get(self.login_url)
+        username_field = WebDriverWait(self.driver, 10).until(
+            EC.visibility_of_element_located((By.NAME, 'username'))
+        )
+        password_field = self.driver.find_element(By.NAME, 'password')
+        submit_button = self.driver.find_element(By.XPATH, '//input[@type="submit" and @value="Login"]')
+
+        username_field.send_keys(self.username)
+        password_field.send_keys(self.password)
+
+        try:
+            self.driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
+            submit_button.click()
+        except Exception as e:
+            self.driver.execute_script("arguments[0].click();", submit_button)
+
+        WebDriverWait(self.driver, 10).until(EC.url_changes(self.login_url))
+
+        self.session_cookies = self.driver.get_cookies()
+        self.session_cookie_dict = self.get_session_cookie_dict()
+        self.init_requests_session()
+
+    def init_requests_session(self):
+        self.requests_session = requests.Session()
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36 Edg/96.0.1054.62'
+        }
+        self.requests_session.headers.update(headers)
+        self.requests_session.cookies.update(self.session_cookie_dict)
+
+    def start_requests(self):
+        for url in self.start_urls:
+            yield scrapy.Request(url, callback=self.parse, cookies=self.session_cookie_dict)
 
     def parse(self, response):
         try:
             content_type = response.headers.get('Content-Type', b'').decode('utf-8')
-            logging.debug(f'Content-Type for {response.url}: {content_type}')
 
             if not content_type.startswith('text'):
-                logging.debug(f'Skipped non-text content: {response.url}')
-                return  # 텍스트 콘텐츠가 아닌 경우 스킵
+                return
 
-            normalized_url = self.normalize_url(response.url)  # URL 정규화
+            normalized_url = self.normalize_url(response.url)
 
-            if normalized_url not in self.seen_urls:
-                self.seen_urls.add(normalized_url)  # 수집된 URL에 추가
-                self.output.write(f'{normalized_url}\n')  # 파일에 URL 기록
-                logging.debug(f'수집된 URL: {normalized_url}')
+            if normalized_url in self.seen_urls:
+                return
 
-                a_links = response.xpath('//a/@href').extract()  # 페이지 내 모든 링크 추출
-                logging.debug(f'Found {len(a_links)} links on {response.url}')
+            self.seen_urls.add(normalized_url)
+            with open(self.output_file, 'a') as f:
+                f.write(f'{normalized_url}\n')
+                f.flush()  # Flush the buffer to ensure data is written immediately
 
-                for link in a_links:
-                    link = response.urljoin(link)  # 상대URL을 절대URL로 변환
-                    link = self.normalize_url(link)  # URL 정규화
-                    link_domain = urlparse(link).netloc
+            a_links = response.xpath('//a/@href').extract()
 
-                    if self.domain_origin in link_domain and link not in self.seen_urls:
-                        logging.debug(f'Yielding request for: {link}')
-                        yield scrapy.Request(url=link, callback=self.parse)  # 링크에 대한 요청 생성
+            for link in a_links:
+                link = response.urljoin(link)
+                link = self.normalize_url(link)
+                link_domain = urlparse(link).netloc
 
-                # Selenium 사용해 JavaScript 이벤트 트리거
-                logging.debug(f'Processing with Selenium for URL: {response.url}')
-                self.driver.get(response.url)
-                self.trigger_js_events()  # JavaScript 이벤트 트리거
+                if self.domain_origin in link_domain and link not in self.seen_urls:
+                    yield scrapy.Request(url=link, callback=self.parse, cookies=self.session_cookie_dict)
 
-                # 업데이트된 페이지 소스로 새로운 응답 객체 생성
-                updated_body = self.driver.page_source
-                updated_response = HtmlResponse(
-                    url=response.url, 
-                    body=updated_body, 
-                    encoding='utf-8',
-                    headers={'Content-Type': 'text/html'}  # Content-Type 명시적으로 추가
-                )
-                logging.debug(f'Updated body length: {len(updated_body)}')
+            self.driver.get(response.url)
+            self.trigger_js_events()
 
-                # 업데이트된 콘텐츠로 페이지 재파싱
-                yield from self.parse(updated_response)
+            updated_body = self.driver.page_source
+            updated_response = HtmlResponse(
+                url=response.url, 
+                body=updated_body, 
+                encoding='utf-8',
+                headers={'Content-Type': 'text/html'}
+            )
+
+            yield updated_response
 
         except Exception as e:
-            logging.error(f'Error detected in Function parse: {e}')
+            pass
 
     def normalize_url(self, url):
         parsed_url = urlparse(url)
         query = parse_qs(parsed_url.query)
-        filtered_query = {k: v for k, v in query.items() if k not in ['random', 'session', 'timestamp']}  # 특정 쿼리 매개변수 제거
+        filtered_query = {k: v for k, v in query.items() if k not in ['random', 'session', 'timestamp']}
         normalized_query = urlencode(filtered_query, doseq=True)
 
         normalized_url = urlunparse((
@@ -97,47 +137,33 @@ class MySpider(scrapy.Spider):
             normalized_query,
             parsed_url.fragment
         ))
-        logging.debug(f'Normalized URL: {normalized_url}')
         return normalized_url
 
     def trigger_js_events(self):
         try:
-            # JavaScript를 실행하여 모든 onclick 이벤트 리스너 트리거
             initial_url = self.driver.current_url
-            logging.debug(f'Triggering JS events on: {initial_url}')
             self.driver.execute_script("""
                 var elements = document.querySelectorAll('*');
                 elements.forEach(function(element) {
-                    element.addEventListener('click', function(event) {
-                        event.stopPropagation();
-                        event.preventDefault();
-                    }, true);
-
-                    if (typeof element.onclick == 'function') {
-                        element.click();  # onclick 이벤트 트리거
+                    var href = element.getAttribute('href');
+                    if (typeof element.onclick == 'function' && href !== 'reset.php' && href !== 'logout.php') {
+                        element.click();
                     }
                 });
             """)
 
-            # 페이지 이동 발생 시 이전 페이지로 돌아감
             try:
                 WebDriverWait(self.driver, 10).until(EC.url_changes(initial_url))
-                logging.debug(f'URL changed from {initial_url}')
                 self.driver.back()
             except Exception as e:
-                logging.debug(f'No URL change detected: {e}')
-                self.handle_no_url_change(initial_url)  # URL 변경되지 않은 경우 처리
+                pass
 
         except Exception as e:
-            logging.error(f'Error triggering JS events: {e}')
+            pass
 
-    def handle_no_url_change(self, url):
-        # URL 변경되지 않은 경우 해당 URL 수집
-        logging.debug(f'Handling no URL change for: {url}')
-        if url not in self.seen_urls:
-            self.seen_urls.add(url)
-            self.output.write(f'No change: {url}\n')
+    def get_session_cookie_dict(self):
+        cookies = {cookie['name']: cookie['value'] for cookie in self.session_cookies}
+        return cookies
 
     def closed(self, reason):
-        self.output.close()  # 출력 파일 닫기
         self.driver.quit()
