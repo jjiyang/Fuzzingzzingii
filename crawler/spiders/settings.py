@@ -11,8 +11,8 @@ USER_AGENT = 'Myproject (+http://www.yourdomain.com)'
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
-# DEBUG 레벨 이상의 로그 설정
-LOG_LEVEL = 'DEBUG'
+# 로그 설정
+LOG_LEVEL = 'INFO'
 
 DOWNLOAD_TIMEOUT = 30
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
@@ -25,6 +25,8 @@ DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
 CONCURRENT_REQUESTS_PER_DOMAIN = 16
 CONCURRENT_REQUESTS_PER_IP = 16
+
+PROXY = 'http://13.209.63.65:8888'
 
 # Disable cookies (enabled by default)
 # COOKIES_ENABLED = False
@@ -49,12 +51,11 @@ SPIDER_MIDDLEWARES = {
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
     'scrapy.downloadermiddlewares.httpproxy.HttpProxyMiddleware': 1,
+    'Myproject.middlewares.ProxyMiddleware': 100,
     'Myproject.middlewares.SeleniumMiddleware': 800,
     # 경로 바뀌면 이것도 바꿔야 함
 }
 
-# 프록시 설정
-PROXY = 'http://your_proxy:your_port'
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html

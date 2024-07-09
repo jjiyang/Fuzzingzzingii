@@ -13,14 +13,15 @@ class SeleniumMiddleware:
         options = Options()
         options.headless = True
 
-        # 프록시 설정 추가
-        proxy = 'http://your_proxy:your_port'
+        proxy = 'http://13.209.63.65:8888'
         options.add_argument(f'--proxy-server={proxy}')
         
         self.driver = webdriver.Chrome(options=options, service=Service('/path/to/your/chromedriver'))
 
     def process_request(self, request, spider):
         try:
+            request.meta['dont_filter'] = True
+            
             self.driver.get(request.url)
             original_domain = self._get_domain(request.url)
             self.obj_click(original_domain)
@@ -29,7 +30,6 @@ class SeleniumMiddleware:
 
             body = self.driver.page_source
             spider.logger.info(f'Adding driver to meta for URL: {request.url}')
-            # 'driver' 키를 메타데이터에 추가하여 반환
             return HtmlResponse(self.driver.current_url, body=body, encoding='utf-8', request=request, meta={'driver': self.driver})
 
         except Exception as e:
