@@ -89,4 +89,4 @@ from shutil import which
 # Selenium 관련 설정
 SELENIUM_DRIVER_NAME = 'chrome'
 SELENIUM_DRIVER_EXECUTABLE_PATH = which('chromedriver')
-SELENIUM_DRIVER_ARGUMENTS=['--headless']  # 브라우저 숨기는 옵션 등 추가 가능
+SELENIUM_DRIVER_ARGUMENTS=['--headless']  

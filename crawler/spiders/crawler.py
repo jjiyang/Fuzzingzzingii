@@ -9,6 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import requests
+import logging
 
 class MySpider(scrapy.Spider):
     name = 'crawler'
@@ -40,6 +41,7 @@ class MySpider(scrapy.Spider):
         
         proxy = 'http://13.209.63.65:8888'
         chrome_options.add_argument(f'--proxy-server={proxy}')
+        logging.info(f'Using proxy: {proxy}')
 
         self.driver = webdriver.Chrome(service=self.service, options=chrome_options)
 
@@ -78,6 +80,7 @@ class MySpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.start_urls:
+            logging.info(f'Starting request for {url} with proxy {self.driver.capabilities.get("proxy")}')
             yield scrapy.Request(url, callback=self.parse, cookies=self.session_cookie_dict)
 
     def parse(self, response):
@@ -104,7 +107,8 @@ class MySpider(scrapy.Spider):
                 link = self.normalize_url(link)
                 link_domain = urlparse(link).netloc
 
-                if self.domain_origin in link_domain and link not in self.seen_urls:
+                if self.domain_origin in link_domain and link not in self.seen_urls and not link.endswith('logout.php'):
+                    logging.info(f'Following link: {link} with proxy {self.driver.capabilities.get("proxy")}')
                     yield scrapy.Request(url=link, callback=self.parse, cookies=self.session_cookie_dict)
 
             self.driver.get(response.url)
