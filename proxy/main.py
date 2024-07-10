@@ -1,19 +1,19 @@
-from server_core import run_proxy_server
-from settings import parse_config
-from cert_manager import generate_certificates, create_example_handlers
+from proxy_server import run_server
+from config import parse_arguments
+from ssl_utils import make_certs, make_example
 
 def main():
-    config = parse_config()
+    args = parse_arguments()
     
-    if config.generate_certs:
-        generate_certificates(config)
+    if args.make_certs:
+        make_certs(args)
         return
     
-    if config.create_example:
-        create_example_handlers()
+    if args.make_example:
+        make_example()
         return
     
-    run_proxy_server(config)
+    run_server(args)
 
 if __name__ == "__main__":
     main()
