@@ -4,8 +4,8 @@ from utils import print_info
 
 def parse_arguments():
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument("-b", "--bind", default="localhost", help="Host to bind")
-    parser.add_argument("-p", "--port", type=int, default=7777, help="Port to bind")
+    parser.add_argument("-b", "--bind", default="0.0.0.0", help="Host to bind")
+    parser.add_argument("-p", "--port", type=int, default=8888, help="Port to bind")
     parser.add_argument(
         "-d",
         "--domain",
@@ -76,8 +76,8 @@ args = parse_arguments()
 
 # 데이터베이스 설정 추가
 db_config = {
-    'host': 'localhost',
-    'user': 'root',
+    'host': '13.209.63.65',
+    'user': 'zzingzzingi',
     'password': '!Ru7eP@ssw0rD!12',
-    'database': 'requests'
+    'database': 'Fuzzingzzingi'
 }

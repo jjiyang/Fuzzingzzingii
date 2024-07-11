@@ -13,7 +13,7 @@ def make_certs(args):
     Popen(["openssl", "genrsa", "-out", args.ca_key, "2048"]).communicate()
     Popen([
         "openssl", "req", "-new", "-x509", "-days", "3650", "-key", args.ca_key,
-        "-sha256", "-out", args.ca_cert, "-subj", "/CN=Proxy3 CA"
+        "-sha256", "-out", args.ca_cert, "-subj", "/CN=Fuzzingzzingi CA"
     ]).communicate()
     Popen(["openssl", "genrsa", "-out", args.cert_key, "2048"]).communicate()
     os.makedirs(args.cert_dir, exist_ok=True)
