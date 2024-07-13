@@ -82,7 +82,7 @@ AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0
 MYSQL_HOST = '13.209.63.65'  # 실제 MySQL 호스트로 변경
 MYSQL_DATABASE = 'Fuzzingzzingi'  # 실제 데이터베이스 이름으로 변경
 MYSQL_USER = 'zzingzzingi'  # 실제 데이터베이스 사용자로 변경
-MYSQL_PASSWORD = '!Ru7eP@ssw0rD!1'  # 실제 데이터베이스 비밀번호로 변경
+MYSQL_PASSWORD = '!Ru7eP@ssw0rD!12'  # 실제 데이터베이스 비밀번호로 변경
 
 
 from shutil import which

@@ -15,13 +15,13 @@ class SeleniumMiddleware:
 
         proxy = 'http://13.209.63.65:8888'
         options.add_argument(f'--proxy-server={proxy}')
-        
-        self.driver = webdriver.Chrome(options=options, service=Service('/path/to/your/chromedriver'))
+
+        self.driver = webdriver.Chrome(options=options, service=Service('./chromedriver'))
 
     def process_request(self, request, spider):
         try:
             request.meta['dont_filter'] = True
-            
+
             self.driver.get(request.url)
             original_domain = self._get_domain(request.url)
             self.obj_click(original_domain)

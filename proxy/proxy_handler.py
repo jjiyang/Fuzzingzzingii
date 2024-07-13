@@ -13,12 +13,15 @@ import json
 import mysql.connector
 import http.cookies
 import brotli
-
+import logging
 from subprocess import Popen, PIPE
 from http.server import BaseHTTPRequestHandler
 from http.client import HTTPMessage
 from utils import with_color, parse_qsl, print_info
 from config import args, request_handler, response_handler, save_handler, db_config
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class ProxyRequestHandler(BaseHTTPRequestHandler):
     lock = threading.Lock()
@@ -26,17 +29,17 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         self.tls = threading.local()
         self.tls.conns = {}
-
         super().__init__(*args, **kwargs)
+        logger.info(f"Initialized handler for {self.client_address}")
 
     def log_error(self, format, *args):
         if isinstance(args[0], socket.timeout):
             return
-
         self.log_message(format, *args)
 
     def do_CONNECT(self):
         host, _ = self.path.split(":", 1)
+        logger.info(f"CONNECT request to {self.path} from {self.client_address}")
         if (
             os.path.isfile(args.ca_key)
             and os.path.isfile(args.ca_cert)
@@ -44,10 +47,10 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             and os.path.isdir(args.cert_dir)
             and (args.domain == "*" or args.domain == host)
         ):
-            print("HTTPS mitm enabled, Intercepting...")
+            logger.info("HTTPS mitm enabled, Intercepting...")
             self.connect_intercept()
         else:
-            print("HTTPS relay only, NOT Intercepting...")
+            logger.info("HTTPS relay only, NOT Intercepting...")
             self.connect_relay()
 
     def connect_intercept(self):
@@ -114,8 +117,8 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         context.load_cert_chain(certpath, args.cert_key)
         try:
             self.connection = context.wrap_socket(self.connection, server_side=True)
-        except ssl.SSLEOFError: 
-            print("Handshake refused by client, maybe SSL pinning?")
+        except ssl.SSLEOFError:
+            logger.warning("Handshake refused by client, maybe SSL pinning?")
             return
         self.rfile = self.connection.makefile("rb", self.rbufsize)
         self.wfile = self.connection.makefile("wb", self.wbufsize)
@@ -132,7 +135,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
         try:
             s = socket.create_connection(address, timeout=self.timeout)
         except Exception as e:
-            print(e)
+            logger.error(f"Error creating connection: {e}")
             self.send_error(502)
             return
         self.send_response(200, "Connection Established")
@@ -153,6 +156,7 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
                 other.sendall(data)
 
     def do_GET(self):
+        logger.info(f"GET request to {self.path} from {self.client_address}")
         if self.path == "http://fuzzingzzingi.cert/":
             self.send_cacert()
             return
@@ -212,9 +216,9 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             res_body = res.read()
         except http.client.IncompleteRead as e:
             res_body = e.partial
-            print(res_body[:10])
+            logger.error(f"Incomplete read: {res_body[:10]}")
         except Exception as e:
-            print(e)
+            logger.error(f"Error handling request: {e}")
             if origin in self.tls.conns:
                 del self.tls.conns[origin]
             self.send_error(502)
@@ -335,19 +339,19 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
 
         try:
             query = """
-            INSERT INTO requests (url, is_https, parameters, method, protocol_version, 
-                                  headers, cookies, response_status, response_headers, 
+            INSERT INTO requests (url, is_https, parameters, method, protocol_version,
+                                  headers, cookies, response_status, response_headers,
                                   response_body, ssl_info)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-            
+
             is_https = isinstance(req.connection, ssl.SSLSocket)
             url = req.path
             parameters = json.dumps(dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(req.path).query)))
             headers = json.dumps(dict(req.headers))
             cookies = json.dumps(dict(http.cookies.SimpleCookie(req.headers.get('Cookie'))))
             response_headers = json.dumps(dict(res.headers))
-            
+
             ssl_info = None
             if is_https:
                 ssl_info = json.dumps({
@@ -363,8 +367,10 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             cursor.execute(query, values)
             conn.commit()
 
+            logger.info(f"Request saved to database: {url}")
+
         except Exception as e:
-            print(f"Error saving to database: {e}")
+            logger.error(f"Error saving to database: {e}")
         finally:
             cursor.close()
             conn.close()

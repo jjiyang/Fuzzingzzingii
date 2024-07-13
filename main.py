@@ -19,7 +19,7 @@ def connect_server():
         server_port = 8888
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # IPv4, TCP
         client_socket.connect((server_ip, server_port))
-        print("연결 성공")
+        print("Porxy Connected")
     except Exception as e:
         print("Failed to connect to server:", e)
 
@@ -76,6 +76,12 @@ def main():
     # URL 입력 받기
     print("Please enter the target URL")
     target_url = input("> ")
+    print("Please enter the login URL")
+    login_url = input("> ")
+    print("Please enter the username")
+    username = input("> ")
+    print("Please enter the password")
+    password = input("> ")
     
     # 도메인 추출
     # domain = extract_domain(target_url)
@@ -88,7 +94,7 @@ def main():
     
     # Scrapy 크롤러 프로세스 시작
     process = CrawlerProcess(get_project_settings())
-    process.crawl(MySpider, start_url=target_url)  # MySpider 클래스의 이름을 사용
+    process.crawl(MySpider, start_url=target_url, login_url = login_url, username = username, password = password)  # MySpider 클래스의 이름을 사용
     process.start()
 
     # 취약점 옵션 선택

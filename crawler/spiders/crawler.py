@@ -8,11 +8,17 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.proxy import Proxy, ProxyType
 import requests
 import logging
+from webdriver_manager.chrome import ChromeDriverManager
 
 class MySpider(scrapy.Spider):
     name = 'crawler'
+
+    custom_settings = {
+        'REQUEST_FINGERPRINTER_IMPLEMENTATION': '2.7',  # 또는 'sha1'
+    }
 
     def __init__(self, start_url=None, login_url=None, username=None, password=None, *args, **kwargs):
         super(MySpider, self).__init__(*args, **kwargs)
@@ -33,42 +39,52 @@ class MySpider(scrapy.Spider):
         self.output_file = 'output.txt'
         self.seen_urls = set()
 
-        chrome_driver_path = './chromedriver'
-        self.service = Service(chrome_driver_path)
+        self.proxy_url = 'http://13.209.63.65:8888'  # 프록시 주소 변경 가능
+        capabilities = webdriver.DesiredCapabilities.CHROME.copy()
+        capabilities['proxy'] = {
+            "proxyType": ProxyType.MANUAL,
+            "httpProxy": self.proxy_url,
+            "sslProxy": self.proxy_url,
+        }
 
         chrome_options = Options()
         chrome_options.add_argument("--headless")
-        
-        proxy = 'http://13.209.63.65:8888'
-        chrome_options.add_argument(f'--proxy-server={proxy}')
-        logging.info(f'Using proxy: {proxy}')
+        chrome_options.add_argument(f'--proxy-server={self.proxy_url}')
+        logging.info(f'Using proxy: {self.proxy_url}')
 
+        self.service = Service(ChromeDriverManager().install())
         self.driver = webdriver.Chrome(service=self.service, options=chrome_options)
 
         self.login()
 
     def login(self):
-        self.driver.get(self.login_url)
-        username_field = WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located((By.NAME, 'username'))
-        )
-        password_field = self.driver.find_element(By.NAME, 'password')
-        submit_button = self.driver.find_element(By.XPATH, '//input[@type="submit" and @value="Login"]')
-
-        username_field.send_keys(self.username)
-        password_field.send_keys(self.password)
-
         try:
+            self.driver.get(self.login_url)
+            username_field = WebDriverWait(self.driver, 10).until(
+                EC.visibility_of_element_located((By.NAME, 'username'))
+            )
+            password_field = self.driver.find_element(By.NAME, 'password')
+            submit_button = self.driver.find_element(By.XPATH, '//input[@type="submit" and @value="Login"]')
+
+            username_field.send_keys(self.username)
+            logging.info(f'Entered username: {self.username}')
+            password_field.send_keys(self.password)
+            logging.info(f'Entered password: {self.password}')
+
             self.driver.execute_script("arguments[0].scrollIntoView(true);", submit_button)
             submit_button.click()
+            logging.info('Submit button clicked')
+
+            WebDriverWait(self.driver, 10).until(EC.url_changes(self.login_url))
+
+            self.current_url = self.driver.current_url
+            logging.info(f'After login, current URL is {self.current_url}')
+
+            self.session_cookies = self.driver.get_cookies()
+            self.session_cookie_dict = self.get_session_cookie_dict()
+            self.init_requests_session()
         except Exception as e:
-            self.driver.execute_script("arguments[0].click();", submit_button)
-
-        WebDriverWait(self.driver, 10).until(EC.url_changes(self.login_url))
-
-        self.session_cookies = self.driver.get_cookies()
-        self.session_cookie_dict = self.get_session_cookie_dict()
-        self.init_requests_session()
+            logging.error(f'Error during login: {e}')
 
     def init_requests_session(self):
         self.requests_session = requests.Session()
@@ -80,8 +96,8 @@ class MySpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            logging.info(f'Starting request for {url} with proxy {self.driver.capabilities.get("proxy")}')
-            yield scrapy.Request(url, callback=self.parse, cookies=self.session_cookie_dict)
+            logging.info(f'Starting request for {url} with proxy {self.proxy_url}')
+            yield scrapy.Request(url, callback=self.parse, cookies=self.session_cookie_dict, meta={'proxy': self.proxy_url})
 
     def parse(self, response):
         try:
@@ -98,7 +114,7 @@ class MySpider(scrapy.Spider):
             self.seen_urls.add(normalized_url)
             with open(self.output_file, 'a') as f:
                 f.write(f'{normalized_url}\n')
-                f.flush()  # Flush the buffer to ensure data is written immediately
+                f.flush()
 
             a_links = response.xpath('//a/@href').extract()
 
@@ -108,24 +124,45 @@ class MySpider(scrapy.Spider):
                 link_domain = urlparse(link).netloc
 
                 if self.domain_origin in link_domain and link not in self.seen_urls and not link.endswith('logout.php'):
-                    logging.info(f'Following link: {link} with proxy {self.driver.capabilities.get("proxy")}')
-                    yield scrapy.Request(url=link, callback=self.parse, cookies=self.session_cookie_dict)
+                    logging.info(f'Following link: {link} with proxy {self.proxy_url}')
+                    yield scrapy.Request(url=link, callback=self.parse, cookies=self.session_cookie_dict, meta={'proxy': self.proxy_url})
 
-            self.driver.get(response.url)
-            self.trigger_js_events()
+            try:
+                self.driver.get(response.url)
+                logging.info(f'Accessing {response.url} through proxy.')
 
-            updated_body = self.driver.page_source
-            updated_response = HtmlResponse(
-                url=response.url, 
-                body=updated_body, 
-                encoding='utf-8',
-                headers={'Content-Type': 'text/html'}
-            )
+                self.trigger_js_events()
 
-            yield updated_response
+                updated_body = self.driver.page_source
+                updated_response = HtmlResponse(
+                    url=response.url,
+                    body=updated_body,
+                    encoding='utf-8',
+                    headers={'Content-Type': 'text/html'}
+                )
+
+                yield from self.parse_page(updated_response)
+            except Exception as e:
+                logging.error(f'Failed to access {response.url} through proxy: {e}')
 
         except Exception as e:
-            pass
+            logging.error(f'Error in parse: {e}')
+
+    def parse_page(self, response):
+        try:
+            a_links = response.xpath('//a/@href').extract()
+
+            for link in a_links:
+                link = response.urljoin(link)
+                link = self.normalize_url(link)
+                link_domain = urlparse(link).netloc
+
+                if self.domain_origin in link_domain and link not in self.seen_urls and not link.endswith('logout.php'):
+                    logging.info(f'Following link: {link} with proxy {self.proxy_url}')
+                    yield scrapy.Request(url=link, callback=self.parse, cookies=self.session_cookie_dict, meta={'proxy': self.proxy_url})
+
+        except Exception as e:
+            logging.error(f'Error during parse_page: {e}')
 
     def normalize_url(self, url):
         parsed_url = urlparse(url)
@@ -160,10 +197,10 @@ class MySpider(scrapy.Spider):
                 WebDriverWait(self.driver, 10).until(EC.url_changes(initial_url))
                 self.driver.back()
             except Exception as e:
-                pass
+                logging.error(f'Error during WebDriverWait or driver.back(): {e}')
 
         except Exception as e:
-            pass
+            logging.error(f'Error during trigger_js_events: {e}')
 
     def get_session_cookie_dict(self):
         cookies = {cookie['name']: cookie['value'] for cookie in self.session_cookies}
