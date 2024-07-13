@@ -19,9 +19,9 @@ def xss():
 
     # 데이터베이스 연결 설정
     db = pymysql.connect(
-        host="127.0.0.1",
+        host="13.209.63.65",
         database="Fuzzingzzingi",
-        user="root",
+        user="zzingzzingi",
         password="!Ru7eP@ssw0rD!12"
     )
 

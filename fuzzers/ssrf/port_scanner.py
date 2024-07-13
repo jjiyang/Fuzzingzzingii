@@ -12,7 +12,7 @@ class PORTSCANNER:
         try:
             resp = requests.get(url, timeout=10)
             if resp.status_code == 200:
-                print(f'Port Scanner :\t{url} open!!\t{resp.status_code}')
+                print(f'Port Scanner :\t{url} RESPONSE :\t{resp.status_code}')
             elif resp == 302:
                 print(f'Port Scanner :\t{url} may open!!\t{resp.status_code}')
             else:
