@@ -334,20 +334,41 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
             pass
 
     def save_to_database(self, req, req_body, res, res_body):
+        url = req.path
+        parsed_url = urllib.parse.urlsplit(url)
+        
+        # 필터링 조건 체크
+        if (url.startswith('/README') or url.endswith('.yml')):
+            return  # 조건에 맞지 않으면 저장하지 않음
+        
+        # origin 확인 (scheme + netloc)
+        current_origin = f"{parsed_url.scheme}://{parsed_url.netloc}"
+        
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor()
 
         try:
+            # origin 확인 및 중복 체크를 위한 쿼리
+            check_query = """
+            SELECT id FROM requests
+            WHERE url = %s AND method = %s AND parameters = %s AND origin = %s
+            """
+            parameters = json.dumps(dict(urllib.parse.parse_qsl(parsed_url.query)))
+            cursor.execute(check_query, (url, req.command, parameters, current_origin))
+            
+            if cursor.fetchone():
+                logger.info(f"Duplicate request or different origin, not saving: {url}")
+                return  # 중복된 요청 또는 다른 origin은 저장하지 않음
+
+            # 기존의 insert 쿼리 수정 (origin 필드 추가)
             query = """
             INSERT INTO requests (url, is_https, parameters, method, protocol_version,
-                                  headers, cookies, response_status, response_headers,
-                                  response_body, ssl_info)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                headers, cookies, response_status, response_headers,
+                                response_body, ssl_info, origin)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
 
             is_https = isinstance(req.connection, ssl.SSLSocket)
-            url = req.path
-            parameters = json.dumps(dict(urllib.parse.parse_qsl(urllib.parse.urlsplit(req.path).query)))
             headers = json.dumps(dict(req.headers))
             cookies = json.dumps(dict(http.cookies.SimpleCookie(req.headers.get('Cookie'))))
             response_headers = json.dumps(dict(res.headers))
@@ -361,7 +382,8 @@ class ProxyRequestHandler(BaseHTTPRequestHandler):
 
             values = (
                 url, is_https, parameters, req.command, req.request_version,
-                headers, cookies, res.status, response_headers, res_body, ssl_info
+                headers, cookies, res.status, response_headers, res_body, ssl_info,
+                current_origin
             )
 
             cursor.execute(query, values)
