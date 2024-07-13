@@ -5,7 +5,7 @@ from urllib.parse import urlparse, urlunparse
 
 class PORTSCANNER:
     def __init__(self):
-        with open('../../payloads/SSRF/port.txt', 'r') as f:
+        with open('payloads/SSRF/port.txt', 'r') as f:
             self.port_num = [port.strip() for port in f]
 
     def requesting(self, url):

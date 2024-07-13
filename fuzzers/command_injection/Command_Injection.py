@@ -16,19 +16,7 @@ class CommandInjection:
             "';zzingzzing=\";sleep 10\";eval $zzingzzing'"
         ]
 
-#  tar -cf aaa.tar ./uploads/
-#  ";sleep 10;
-        # ;sleep 10
-        # $(sleep 10)
-        # `sleep 10`
-        # ';sleep 10
-        # "sleep 10
-        # "|| sleep 10
-# cmd = ["sleep 10","SleeP 10","SleEp$IFS10","`sleep 10`","$(sleep 10)"]
-# arr1 ['"',"'",""]
-# arr2 [";","&&","&","|",""]
-# arr3
-        self.command_injection = open('../payloads/Command Injection/command_payload.txt', 'r')
+        self.command_injection = open('payloads/Command Injection/command_payload.txt', 'r')
         self.connection = None
         self.cursor = None
 
@@ -41,9 +29,9 @@ class CommandInjection:
         try:
             self.connection = mysql.connector.connect(
                 host="127.0.0.1",
-                database="Fuzzingzzingii",
+                database="Fuzzingzzingi",
                 user="root",
-                password="skawjddns123@"
+                password="!Ru7eP@ssw0rD!12"
             )
             if self.connection.is_connected():
                 self.cursor = self.connection.cursor()
@@ -108,14 +96,14 @@ class CommandInjection:
                     if method == 'GET':
                         try:
                             start_time = time.time()
-                            resp_param = requests.get(url, params=param, timeout=7)
+                            resp_param = requests.get(url, params=param, timeout=10)
                             end_time = time.time() - start_time
                             if int(end_time) >= 5:
                                 print(f"Checked Basic payload = {payload}")
                                 return url, method, param
 
                             start_time = time.time()
-                            resp_cookie = requests.get(url, cookies={'Cookie': payload}, timeout=7)
+                            resp_cookie = requests.get(url, cookies={'Cookie': payload}, timeout=10)
                             end_time = time.time() - start_time
                             if int(end_time) >= 5:
                                 print(f"Checked Basic payload with COOKIES = {payload}")
@@ -125,7 +113,7 @@ class CommandInjection:
                             resp_header = requests.get(url, headers={'User-Agent': payload,
                                                                      'Referer': payload,
                                                                      'X-Forwarded-For': payload},
-                                                       timeout=7)
+                                                       timeout=10)
                             end_time = time.time() - start_time
                             if int(end_time) >= 5:
                                 print(f"Checked Basic payload with HEADERS = {payload}")
@@ -137,7 +125,7 @@ class CommandInjection:
                     elif method == 'POST':
                         try:
                             start_time = time.time()
-                            resp_param = requests.post(url, data=param, timeout=7)
+                            resp_param = requests.post(url, data=param, timeout=10)
                             end_time = time.time() - start_time
                             if int(end_time) >= 5:
                                 print(f"Checked Basic payload = {payload}")
@@ -157,14 +145,14 @@ class CommandInjection:
                     if method == 'GET':
                         try:
                             start_time = time.time()
-                            resp_param = requests.get(url, params=param, timeout=12)
+                            resp_param = requests.get(url, params=param, timeout=15)
                             end_time = time.time() - start_time
                             if int(end_time) >= 10:
                                 print(f"Checked payload = {payload}")
                                 return url, method, param
 
                             start_time = time.time()
-                            resp_cookie = requests.get(url, cookies={'Cookie': payload}, timeout=12)
+                            resp_cookie = requests.get(url, cookies={'Cookie': payload}, timeout=15)
                             end_time = time.time() - start_time
                             if int(end_time) >= 10:
                                 print(f"Checked payload with COOKIES = {payload}")
@@ -174,7 +162,7 @@ class CommandInjection:
                             resp_header = requests.get(url, headers={'User-Agent': payload,
                                                                      'Referer': payload,
                                                                      'X-Forwarded-For': payload},
-                                                       timeout=12)
+                                                       timeout=15)
                             end_time = time.time() - start_time
                             if int(end_time) >= 10:
                                 print(f"Checked payload with HEADERS = {payload}")
@@ -186,7 +174,7 @@ class CommandInjection:
                     elif method == 'POST':
                         try:
                             start_time = time.time()
-                            resp_param = requests.post(url, data=param, timeout=12)
+                            resp_param = requests.post(url, data=param, timeout=15)
                             end_time = time.time() - start_time
                             if int(end_time) >= 10:
                                 print(f"Checked payload = {payload}")
@@ -197,7 +185,7 @@ class CommandInjection:
         return False
 
     def get_payloads(self):
-        with open('../payloads/Command Injection/command_payload.txt', 'r') as f:
+        with open('payloads/Command Injection/command_payload.txt', 'r') as f:
             payloads = [p.strip() for p in f]
         return payloads
 
@@ -210,14 +198,14 @@ class CommandInjection:
 
                 if method == 'GET':
                     try:
-                        resp_param = requests.get(url, params=param, timeout=7)
+                        resp_param = requests.get(url, params=param, timeout=10)
                         print(f"{Style.BRIGHT}{Fore.RED}Command Injection{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload}\t STATUS : {resp_param.status_code}")
-                        resp_cookie = requests.get(url, cookies={'Cookie': payload}, timeout=7)
+                        resp_cookie = requests.get(url, cookies={'Cookie': payload}, timeout=10)
                         print(f"{Style.BRIGHT}{Fore.RED}Command Injection{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload}\t STATUS : {resp_cookie.status_code}")
                         resp_header = requests.get(url, headers={'User-Agent': payload,
                                                                  'Referer': payload,
                                                                  'X-Forwarded-For': payload},
-                                                   timeout=7)
+                                                   timeout=10)
                         print(f"{Style.BRIGHT}{Fore.RED}Command Injection{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload}\t STATUS : {resp_header.status_code}")
 
                     except Exception as e:
@@ -225,7 +213,7 @@ class CommandInjection:
 
                 elif method == 'POST':
                     try:
-                        resp_param = requests.post(url, data=param, timeout=7)
+                        resp_param = requests.post(url, data=param, timeout=10)
                         print(f"{Style.BRIGHT}{Fore.RED}Command Injection{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload}\t STATUS : {resp_param.status_code}")
 
                     except Exception as e:
