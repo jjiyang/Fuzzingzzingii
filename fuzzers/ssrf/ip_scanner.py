@@ -1,6 +1,7 @@
 import requests
 from concurrent.futures import ThreadPoolExecutor
 import re
+import validators
 # 포트 80,
 
 class IPSCANNER:
@@ -13,7 +14,7 @@ class IPSCANNER:
         try:
             resp = requests.get(url)
             if resp.status_code == 200:
-                print(f'IP Scanner :\t{url} FOUND!!\t{resp.status_code}')
+                print(f'IP Scanner :\t{url} RESPONSE :\t{resp.status_code}')
         except Exception as e:
             if "Connection refused" in str(e):
                 print(f'IP Scanner :\t{url} \trefused the connection')

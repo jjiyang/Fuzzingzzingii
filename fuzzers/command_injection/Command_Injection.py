@@ -28,9 +28,9 @@ class CommandInjection:
 
         try:
             self.connection = mysql.connector.connect(
-                host="127.0.0.1",
+                host="13.209.63.65",
                 database="Fuzzingzzingi",
-                user="root",
+                user="zzingzzingi",
                 password="!Ru7eP@ssw0rD!12"
             )
             if self.connection.is_connected():
@@ -230,9 +230,9 @@ class CommandInjection:
             five_url, five_method, five_param = time_result_five
             time_result = self.check_time_ten(five_url, five_method, five_param)
 
-        if time_result:
-            checked_url, checked_method, checked_param = time_result
-            print(f'EXECUTING COMMAND INJECTION FUZZING...\turl : {checked_url}\t\tmethod : {checked_method}\t\tparam : {checked_param}')
-            self.execute_injection(checked_url, checked_method, checked_param, payloads)
+            if time_result:
+                checked_url, checked_method, checked_param = time_result
+                print(f'EXECUTING COMMAND INJECTION FUZZING...\turl : {checked_url}\t\tmethod : {checked_method}\t\tparam : {checked_param}')
+                self.execute_injection(checked_url, checked_method, checked_param, payloads)
         else:
             print(f"{Style.BRIGHT}{Fore.BLUE}!!!\tThere is no Command Injection Vulnerability\t!!!{Style.RESET_ALL}")

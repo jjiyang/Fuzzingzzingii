@@ -19,10 +19,10 @@ class FileDownloadVulnerabilitySpider(scrapy.Spider):
         # 데이터베이스 연결 생성
         try:
             connection = mysql.connector.connect(
-                host="127.0.0.1",
-                database="Fuzzingzzingii",
-                user="root",
-                password="skawjddns123@"
+                host="13.209.63.65",
+                database="Fuzzingzzingi",
+                user="zzingzzingi",
+                password="!Ru7eP@ssw0rD!12"
             )
 
             # DB 수정하기
