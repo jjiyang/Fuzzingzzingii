@@ -8,13 +8,11 @@ from colorama import init, Fore, Style
 
 class SqlInjection:
     def __init__(self):
-        with open("../payloads/SQL Injection/basic_payloads/simple.txt", 'r', encoding='utf-8') as simple:
-            self.basic_simple = [s.strip() for s in simple.readlines()]
-        with open("../payloads/SQL Injection/basic_payloads/union_based.txt", 'r', encoding='utf-8') as union:
+        with open("payloads/SQL Injection/basic_payloads/union_based.txt", 'r', encoding='utf-8') as union:
             self.basic_union = [u.strip() for u in union.readlines()]
-        with open("../payloads/SQL Injection/basic_payloads/error_based.txt", 'r', encoding='utf-8') as error:
+        with open("payloads/SQL Injection/basic_payloads/error_based.txt", 'r', encoding='utf-8') as error:
             self.basic_error = [e.strip() for e in error.readlines()]
-        with open("../payloads/SQL Injection/basic_payloads/time_based.txt", 'r', encoding='utf-8') as ttime:
+        with open("payloads/SQL Injection/basic_payloads/time_based.txt", 'r', encoding='utf-8') as ttime:
             self.basic_time = [t.strip() for t in ttime.readlines()]
 
         self.connection = None
@@ -26,9 +24,9 @@ class SqlInjection:
         try:
             self.connection = mysql.connector.connect(
                 host="127.0.0.1",
-                database="Fuzzingzzingii",
+                database="Fuzzingzzingi",
                 user="root",
-                password="skawjddns123@"
+                password="!Ru7eP@ssw0rD!12"
             )
             if self.connection.is_connected():
                 self.cursor = self.connection.cursor()
@@ -57,31 +55,31 @@ class SqlInjection:
         return json_result
 
     def get_payloads(self):
-        file = open('../payloads/SQL Injection/main_payloads/simple_payload.txt', 'r', encoding='utf-8')
+        file = open('payloads/SQL Injection/main_payloads/simple_payload.txt', 'r', encoding='utf-8')
         payloads_simple = []
         for s in file.readlines():
             payloads_simple.append(s.strip())
         file.close()
 
-        file = open('../payloads/SQL Injection/main_payloads/union_payload.txt', 'r', encoding='utf-8')
+        file = open('payloads/SQL Injection/main_payloads/union_payload.txt', 'r', encoding='utf-8')
         payloads_union = []
         for u in file.readlines():
             payloads_union.append(u.strip())
         file.close()
 
-        file = open('../payloads/SQL Injection/main_payloads/error_payload.txt', 'r', encoding='utf-8')
+        file = open('payloads/SQL Injection/main_payloads/error_payload.txt', 'r', encoding='utf-8')
         payloads_error = []
         for e in file.readlines():
             payloads_error.append(e.strip())
         file.close()
 
-        file = open('../payloads/SQL Injection/main_payloads/blind_payload.txt', 'r', encoding='utf-8')
+        file = open('payloads/SQL Injection/main_payloads/blind_payload.txt', 'r', encoding='utf-8')
         payloads_blind = []
         for b in file.readlines():
             payloads_blind.append(b.strip())
         file.close()
 
-        file = open('../payloads/SQL Injection/main_payloads/time_payload.txt', 'r', encoding='utf-8')
+        file = open('payloads/SQL Injection/main_payloads/time_payload.txt', 'r', encoding='utf-8')
         payloads_time = []
         for t in file.readlines():
             payloads_time.append(t.strip())
@@ -102,7 +100,6 @@ class SqlInjection:
     def checksqli_union(self, url, method, param):
         # union
         if param:
-            self.encoding_payloads(self.basic_union)
             for union_base in self.basic_union:
                 for key in param:
                     param[key] = union_base
@@ -132,7 +129,6 @@ class SqlInjection:
     def checksqli_error(self, url, method, param):
         # error based
         if param:
-            self.encoding_payloads(self.basic_error)
             for error_base in self.basic_error:
                 for key in param:
                     param[key] = error_base
@@ -161,7 +157,6 @@ class SqlInjection:
     def checksqli_time(self, url, method, param):
         # time based
         if param:
-            self.encoding_payloads(self.basic_time)
             for time_base in self.basic_time:
                 for key in param:
                     param[key] = time_base
@@ -359,8 +354,8 @@ class SqlInjection:
         error_check = self.checksqli_error(url, method, param)
         time_check = self.checksqli_time(url, method, param)
 
-        if union_check and error_check and time_check:
-            checked_url, checked_method, checked_param = time_check
+        if union_check:
+            checked_url, checked_method, checked_param = union_check
 
             print(f'EXECUTING SQL INJECTION FUZZING...\turl : {checked_url}\t\tmethod : {checked_method}\t\tparam : {checked_param}')
             payloads_simple = self.encoding_payloads(payloads_simple)
@@ -380,3 +375,44 @@ class SqlInjection:
             payloads_blind = self.encoding_payloads(payloads_blind)
             self.execute_time(checked_url, checked_method, checked_param, payloads_time, payloads_blind)
 
+        elif error_check:
+            checked_url, checked_method, checked_param = error_check
+
+            print(f'EXECUTING SQL INJECTION FUZZING...\turl : {checked_url}\t\tmethod : {checked_method}\t\tparam : {checked_param}')
+            payloads_simple = self.encoding_payloads(payloads_simple)
+            self.execute_simple(checked_url, checked_method, checked_param, payloads_simple)
+
+            print(f'EXECUTING SQL INJECTION FUZZING...\turl : {checked_url}\t\tmethod : {checked_method}\t\tparam : {checked_param}')
+            payloads_union = self.encoding_payloads(payloads_union)
+            self.execute_union(checked_url, checked_method, checked_param, payloads_union)
+
+            print(f'EXECUTING SQL INJECTION FUZZING...\turl : {union_check}\t\tmethod : {error_check}\t\tparam : {checked_param}')
+            payloads_error = self.encoding_payloads(payloads_error)
+            payloads_blind = self.encoding_payloads(payloads_blind)
+            self.execute_error(union_check, error_check, checked_param, payloads_error, payloads_blind)
+
+            print(f'EXECUTING SQL INJECTION FUZZING...\turl : {checked_url}\t\tmethod : {checked_method}\t\tparam : {checked_param}')
+            payloads_time = self.encoding_payloads(payloads_time)
+            payloads_blind = self.encoding_payloads(payloads_blind)
+            self.execute_time(checked_url, checked_method, checked_param, payloads_time, payloads_blind)
+
+        elif time_check:
+            checked_url, checked_method, checked_param = time_check
+
+            print(f'EXECUTING SQL INJECTION FUZZING...\turl : {checked_url}\t\tmethod : {checked_method}\t\tparam : {checked_param}')
+            payloads_simple = self.encoding_payloads(payloads_simple)
+            self.execute_simple(checked_url, checked_method, checked_param, payloads_simple)
+
+            print(f'EXECUTING SQL INJECTION FUZZING...\turl : {checked_url}\t\tmethod : {checked_method}\t\tparam : {checked_param}')
+            payloads_union = self.encoding_payloads(payloads_union)
+            self.execute_union(checked_url, checked_method, checked_param, payloads_union)
+
+            print(f'EXECUTING SQL INJECTION FUZZING...\turl : {union_check}\t\tmethod : {error_check}\t\tparam : {checked_param}')
+            payloads_error = self.encoding_payloads(payloads_error)
+            payloads_blind = self.encoding_payloads(payloads_blind)
+            self.execute_error(union_check, error_check, checked_param, payloads_error, payloads_blind)
+
+            print(f'EXECUTING SQL INJECTION FUZZING...\turl : {checked_url}\t\tmethod : {checked_method}\t\tparam : {checked_param}')
+            payloads_time = self.encoding_payloads(payloads_time)
+            payloads_blind = self.encoding_payloads(payloads_blind)
+            self.execute_time(checked_url, checked_method, checked_param, payloads_time, payloads_blind)

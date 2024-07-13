@@ -13,6 +13,13 @@ from crawler.spiders.crawler import MySpider
 # from Myproject.Myproject.spiders.go_to_fuzzer import SendToFuzzer
 # from server import PacketLoggerServer
 
+from fuzzers.command_injection.commandimain import command_injection
+from fuzzers.sql_injection.sqlimain import sqli_get_option, sql
+from fuzzers.ssrf.ssrfmain import ssrf_get_option, ssrf
+from fuzzers.file_download.filedownloadmain import file_download
+from fuzzers.xss.XSS import xss
+
+
 def connect_server():
     try:
         server_ip = "13.209.63.65"
@@ -38,15 +45,37 @@ def display_menu(options):
     print("0. Exit")
     print("======================================================================")
 
+def execute_option(option_name):
+    if option_name == "xss":
+        xss()
+    elif option_name == "sql_injection":
+        sqli_get_option()
+    elif option_name == "SSRF":
+        ssrf_get_option()
+    elif option_name == "Command Injection":
+        command_injection()
+    elif option_name == "File Download Vulnerabilities":
+        file_download()
 
 def toggle_option(options, choice):
     if choice == len(options) + 1:  # Toggle ALL options
         all_on = all(options.values())
         for key in options:
             options[key] = not all_on
+
+        xss()
+        sql()
+        ssrf()
+        command_injection()
+        file_download()
+
     elif choice > 0 and choice <= len(options):
         option_name = list(options.keys())[choice - 1]
         options[option_name] = not options[option_name]
+
+        if option_name:
+            execute_option(option_name)
+            options[option_name] = not options[option_name]
 
 def main():
     print("======================================================================")
@@ -99,11 +128,11 @@ def main():
 
     # 취약점 옵션 선택
     options = {
-    "XSS": False,
-    "SQL Injection": False,
+    "xss": False,
+    "sql_injection": False,
     "SSRF": False,
     "Command Injection": False,
-    "File Upload Vulnerabilities": False,
+    # "File Upload Vulnerabilities": False,
     "File Download Vulnerabilities": False
     }
 
@@ -121,6 +150,9 @@ def main():
             print("Invalid input. Please enter a number.")
         except Exception as e:
             print(f"An error occurred: {e}")
+
+
+
 
     # 선택한 취약점에 따른 코드 실행 구현 import 해서 구현하면 될듯
 

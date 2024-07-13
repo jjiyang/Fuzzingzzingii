@@ -4,18 +4,20 @@ import re
 from colorama import init, Fore, Style
 import json
 import validators
-from localweb import LOCAL
+from fuzzers.ssrf.local import LOCAL
+
 
 class SSRF:
     def __init__(self):
-        self.basic_payload = open('../../payloads/SSRF/basic_ssrf_payloads.txt', 'r', encoding='utf-8')
-        self.ssrf_payload = open('../../payloads/SSRF/ssrf_payloads.txt', 'r', encoding='utf-8')
-        self.ssrf_whitelist_payload = open('../../payloads/SSRF/ssrf_whitelist_payloads.txt', 'r', encoding='utf-8')
+        self.basic_payload = open('payloads/SSRF/basic_ssrf_payloads.txt', 'r', encoding='utf-8')
+        self.ssrf_payload = open('payloads/SSRF/ssrf_payloads.txt', 'r', encoding='utf-8')
+        self.ssrf_whitelist_payload = open('payloads/SSRF/ssrf_whitelist_payloads.txt', 'r', encoding='utf-8')
 
         self.target_param = re.compile(r'(url|path|file|image|api|locate)')
         self.target_resp = '2UDkb36hDLPMzInN3FDvVf527tQzfKMx+Lj96kZUbBocXMw9ylIPEBeq+5sQ8CRVlwcq7fapCnCtQa4'
         self.mylocalhost = 'http://localhost:8080'
-        self.local_server = LOCAL()
+        self.local_server = LOCAL()  # Initialize the local server
+        self.local_server.start_server()  # Start the local server
 
         self.connection = None
         self.cursor = None
@@ -26,9 +28,9 @@ class SSRF:
         try:
             self.connection = mysql.connector.connect(
                 host="127.0.0.1",
-                database="Fuzzingzzingii",
+                database="Fuzzingzzingi",
                 user="root",
-                password="skawjddns123@"
+                password="!Ru7eP@ssw0rD!12"
             )
             if self.connection.is_connected():
                 self.cursor = self.connection.cursor()
@@ -102,8 +104,10 @@ class SSRF:
                 if status >= 200 and status < 400:
                     print(f"Checked Basic payload = {payload}")
                     return url, method, param
-                elif self.target_resp in resp.text or local_request:
+
+                elif self.target_resp in resp.text or self.local_server.get_trigger():  # Check the trigger
                     print(f"Checked Basic payload = {payload}")
+                    self.local_server.reset_trigger()  # Reset the trigger
                     return url, method, param
 
             except Exception as e:
@@ -125,8 +129,10 @@ class SSRF:
                 if status >= 200 and status < 400:
                     print(f"Checked Basic payload = {payload}")
                     return url, method, param
-                elif self.target_resp in resp.text or local_request:
+
+                elif self.target_resp in resp.text or self.local_server.get_trigger():  # Check the trigger
                     print(f"Checked Basic payload = {payload}")
+                    self.local_server.reset_trigger()  # Reset the trigger
                     return url, method, param
 
             except Exception as e:
@@ -138,7 +144,7 @@ class SSRF:
                     return url, method, param
                 else:
                     print(f"REQUEST ERROR : {payload}")
-        return False
+        return False # 테스트 시 조정
 
     def requestingSSRF_execute(self, url, method, param, payload):
         if method == 'GET':
@@ -175,8 +181,10 @@ class SSRF:
                             param[key] = payload
                             print(f'CHECKING...\turl : {url}\t\tmethod : {method}\t\tpayload : {param}')
                             return self.requestingSSRF_check(url, method, param, payload, local_request)
+            else:
+                print(f'NO TARGET PARAMETER IN THIS URL : {url}')
 
-        return False
+        return False # 테스트 시 조정
 
     def execute_injection(self, url, method, param, payloads):
         init()
@@ -203,6 +211,7 @@ class SSRF:
                     print(f"{Style.BRIGHT}{Fore.RED}REQUEST ERROR{Style.RESET_ALL}\t method : {method}  URL : {url}\t params : {param}\t PAYLOAD : {payload}")
 
             inject_url = url
+
     def execute_ssrf(self, url, method, param, ssrf_payloads, white_payloads):
         local_request = self.local_server.get_trigger()
         check_result = self.check_ssrf(url, method, param, local_request)
@@ -212,6 +221,8 @@ class SSRF:
             print(f'EXECUTING SSRF FUZZING...\turl : {checked_url}\t\tmethod : {checked_method}\t\tparam : {checked_param}')
             self.execute_whitelist(checked_url, checked_method, checked_param, white_payloads)
             self.execute_injection(checked_url, checked_method, checked_param, ssrf_payloads)
+
+        self.local_server.reset_trigger()  # Reset the trigger after execution
 
     def close_file(self):
         self.ssrf_whitelist_payload.close()
